@@ -1,5 +1,5 @@
 import sqlite3
-from flask import Flask, request, jsonify, g
+from flask import g
 
 DATABASE = '../database/database.db'
 
@@ -24,5 +24,3 @@ def executeUpdate(query, args=()):
     db.commit()
 
     return
-
-    

@@ -1,18 +1,21 @@
 import random
 import string
 from authentification import *
+from flask import jsonify
 
 def create_disponibility(pageId, date):
     userId = authenticate_token()
 
     if(not (pageId and date)):
         return jsonify({'error': 'All fields are required.'}), 400
+    
 
+    #Verify if logged user is the owner of the page
     result = executeQuery("SELECT user_id FROM Page WHERE id = ?", (pageId,))
 
     if not result:
         return jsonify({'error': 'Page does not exist'}), 404
-
+    
     if not userId or not (result["user_id"] == userId):
         return jsonify({'error': 'Unauthorized'}), 401
 
@@ -27,6 +30,10 @@ def create_disponibility(pageId, date):
     
     except sqlite3.Error as e:
         return jsonify({'error': f'Database error: {str(e)}'}), 500
+    
+
+
+
     
 def book_disponibility(pageId, disponibilityId, name, mail):
     if(not (name and mail)):
@@ -46,6 +53,9 @@ def book_disponibility(pageId, disponibilityId, name, mail):
     
     except sqlite3.Error as e:
         return jsonify({'error': f'Database error: {str(e)}'}), 500
+    
+
+
 
     
 def delete_disponibility(pageId, disponibilityId):

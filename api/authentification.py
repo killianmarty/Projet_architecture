@@ -2,6 +2,7 @@ from database import *
 import bcrypt
 import jwt
 from datetime import datetime, timedelta
+from flask import jsonify, request
 
 SECRET_KEY = 'xFUIOWIarlY5hBQU9lLunttJ7nPlfqGF'
 
@@ -16,21 +17,29 @@ def authenticate_token():
     except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
         return None
 
+
+
+
 def signin(username, password, firstName, lastName):
     
     if not username or not password or not firstName or not lastName:
         return jsonify({'error': 'All fields are required.'}), 400
 
-    #Call to database
+    #Check if user already exists
     user = executeQuery("SELECT * FROM User WHERE username = ?", (username,))
 
     if user:
         return jsonify({'error': 'User already exists'}), 400
 
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+
+    #Call to database
     executeUpdate("INSERT INTO User (firstName, lastName, username, password) VALUES (?, ?, ?, ?)", (firstName, lastName, username, hashed_password,))
 
     return jsonify({'message': 'User created'}), 201
+
+
+
 
 def login(username, password):
 

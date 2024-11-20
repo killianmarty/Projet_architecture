@@ -21,9 +21,13 @@ def get_page(pageId):
     except sqlite3.Error as e:
         return jsonify({'error': f'Database error: {str(e)}'}), 500
 
+
+
+
 def create_page(pageName, description, visible):
     userId = authenticate_token()
 
+    #Verify if logged user is the owner of the page
     if not userId:
         return jsonify({'error': 'Unauthorized'}), 401
 
