@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connexion - MK Réservation</title>
+    <link rel="stylesheet" href="../static/inscription.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background"></div> <!-- Arrière-plan dynamique -->
+    <div class="container">
+        <div class="form-wrapper">
+            <h2>Connexion</h2>
+            <form id="Connexion" action="#" method="POST">
+                <label for="nom-utilisateur">Nom d'utilisateur :</label>
+                <input type="text" id="nom-utilisateur" name="nom-utilisateur" required placeholder="Entrez votre nom d'utilisateur">
+
+                <label for="motdepasse">Mot de passe :</label>
+                <input type="password" id="motdepasse" name="motdepasse" required placeholder="Entrez votre mot de passe">
+
+                <div class="form-footer">
+                    <input type="submit" value="Se Connecter">
+                    <button type="button" onclick="goBack()">Retour</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+</body>
+</html>

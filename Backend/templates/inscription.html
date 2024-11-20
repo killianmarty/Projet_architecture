@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription - MK Réservation</title>
+    <link rel="stylesheet" href="../static/inscription.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="background"></div> <!-- Arrière-plan dynamique -->
+    <div class="container">
+        <div class="form-wrapper">
+            <h2>Inscription</h2>
+            <form id="inscriptionForm" action="#" method="POST">
+                <label for="nom">Nom :</label>
+                <input type="text" id="nom" name="nom" required placeholder="Entrez votre nom">
+
+                <label for="prenom">Prénom :</label>
+                <input type="text" id="prenom" name="prenom" required placeholder="Entrez votre prénom">
+
+                <label for="nom-utilisateur">Nom d'utilisateur :</label>
+                <input type="text" id="nom-utilisateur" name="nom-utilisateur" required placeholder="Choisissez un nom d'utilisateur">
+
+                <label for="motdepasse">Mot de passe :</label>
+                <input type="password" id="motdepasse" name="motdepasse" required placeholder="Créez un mot de passe">
+
+                <label for="confmotdepasse">Confirmer le mot de passe :</label>
+                <input type="password" id="confmotdepasse" name="confmotdepasse" required placeholder="Confirmez votre mot de passe">
+
+                <div class="form-footer">
+                    <input type="submit" value="S'inscrire">
+                    <button type="button" onclick="goBack()">Retour</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Fonction pour valider le mot de passe
+        document.getElementById('inscriptionForm').addEventListener('submit', function(event) {
+            var motdepasse = document.getElementById('motdepasse').value;
+            var confMotdepasse = document.getElementById('confmotdepasse').value;
+            
+            // Si les mots de passe ne correspondent pas
+            if (motdepasse !== confMotdepasse) {
+                // Empêche l'envoi du formulaire
+                event.preventDefault();
+                // Affiche un message d'erreur
+                alert("Les mots de passe ne correspondent pas. Veuillez les retaper.");
+            }
+        });
+
+        function goBack() {
+            window.history.back();
+        }
+    </script>
+</body>
+</html>
