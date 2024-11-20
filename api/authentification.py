@@ -1,0 +1,53 @@
+from database import *
+import bcrypt
+import jwt
+from datetime import datetime, timedelta
+
+SECRET_KEY = 'xFUIOWIarlY5hBQU9lLunttJ7nPlfqGF'
+
+def authenticate_token():
+    token = request.headers.get('Authorization')
+    if not token:
+        return None
+    try:
+        token = token.split(" ")[1]  # "Bearer <token>"
+        decoded_token = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        return decoded_token['userId']
+    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+        return None
+
+def signin(username, password, firstName, lastName):
+    
+    if not username or not password or not firstName or not lastName:
+        return jsonify({'error': 'All fields are required.'}), 400
+
+    #Call to database
+    user = executeQuery("SELECT * FROM User WHERE username = ?", (username,))
+
+    if user:
+        return jsonify({'error': 'User already exists'}), 400
+
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    executeUpdate("INSERT INTO User (firstName, lastName, username, password) VALUES (?, ?, ?, ?)", (firstName, lastName, username, hashed_password,))
+
+    return jsonify({'message': 'User created'}), 201
+
+def login(username, password):
+
+    if not username or not password:
+        return jsonify({'error': 'Username and password are required'}), 400
+
+    #Check username and password
+    user = executeQuery("SELECT * FROM User WHERE username = ?", (username,))
+
+    if user and bcrypt.checkpw(password.encode('utf-8'), user['password']):
+
+        # Generate JWT Token
+        token = jwt.encode({
+            'userId': user['id'],
+            'exp': datetime.utcnow() + timedelta(hours=1)
+        }, SECRET_KEY, algorithm='HS256')
+
+        return jsonify({'token': token})
+
+    return jsonify({'error': 'Invalid credentials'}), 400
