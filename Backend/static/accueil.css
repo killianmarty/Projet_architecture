@@ -1,83 +1,67 @@
-/* Style de la page */
+/* Réinitialisation du style */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Style global */
 body {
-    font-family: Arial, sans-serif;
-    background-color: #f8f9fa;
+    font-family: 'Poppins', sans-serif;
+    background-color: #e1e7f0; /* Fond gris clair */
+    color: #333;
 }
 
-/* Section principale de bienvenue */
+/* Navbar */
+.navbar {
+    background-color: #007bff;
+    padding: 1rem 2rem;
+}
+
+.navbar .navbar-brand {
+    color: white;
+    font-size: 1.5rem;
+}
+
+.navbar .navbar-nav .nav-link {
+    color: white;
+    font-size: 1.1rem;
+}
+
+.navbar .navbar-nav .nav-link:hover {
+    color: #ff9900;
+}
+
+/* Barre de recherche */
+.input-group {
+    max-width: 600px;
+    margin:0 auto;
+    
+}
+
+.input-group .form-control {
+    font-size: 1rem;
+    padding: 10px;
+}
+
+.input-group .btn-warning {
+    font-size: 1rem;
+    padding: 10px;
+}
+
 .welcome-section {
-    background-color: #007bff;
-    color: white;
-    text-align: center;
-    padding: 50px 0;
-    animation: fadeIn 1.5s ease-in-out;
+    padding: 80px 0;
 }
 
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
-}
-
-.welcome-title {
-    font-size: 36px;
+h1.display-4 {
+    font-size: 3rem;
     font-weight: bold;
-    margin-bottom: 20px;
 }
 
-.welcome-description {
-    font-size: 20px;
-    margin-bottom: 30px;
+.lead {
+    font-size: 1.5rem;
+    color: #555;
 }
 
-/* Section des options */
-.options-section {
-    padding: 50px 0;
-    background-color: #ffffff;
-    text-align: center;
-}
 
-.options-section h2 {
-    font-size: 30px;
-    margin-bottom: 30px;
-}
 
-/* Cartes des options */
-.option-card {
-    margin: 15px;
-    padding: 30px;
-    background-color: #f1f1f1;
-    border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease;
-}
-
-.option-card:hover {
-    transform: translateY(-5px);
-}
-
-.option-card a {
-    display: inline-block;
-    padding: 10px 20px;
-    margin-top: 20px;
-    background-color: #007bff;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-}
-
-/* Cartes de boutons spécifiques */
-.btn-primary {
-    background-color: #007bff;
-}
-
-.btn-success {
-    background-color: #28a745;
-}
-
-.btn-info {
-    background-color: #17a2b8;
-}
