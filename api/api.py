@@ -8,7 +8,7 @@ import string
 
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'votre_clé_secrète_pour_jwt'
+app.config['SECRET_KEY'] = 'xFUIOWIarlY5hBQU9lLunttJ7nPlfqGF'
 
 DATABASE = '../database/database.db'
 
@@ -18,12 +18,7 @@ def get_db():
         g.db = sqlite3.connect(DATABASE)
         g.db.row_factory = sqlite3.Row
     return g.db
-
-
-def init_db():
-    with app.app_context():
-        db = get_db()
-        
+   
 
 def authenticate_token():
     token = request.headers.get('Authorization')
@@ -35,9 +30,14 @@ def authenticate_token():
         return decoded_token['userId']
     except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
         return None
+    
 
+
+#Authentification routes
 @app.route('/signin', methods=['POST'])
 def signin():
+
+    #Get data from request
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
@@ -47,6 +47,7 @@ def signin():
     if not username or not password or not firstName or not lastName:
         return jsonify({'error': 'All fields are required.'}), 400
 
+    #Call to database
     db = get_db()
     cursor = db.cursor()
     cursor.execute("SELECT * FROM User WHERE username = ?", (username,))
@@ -61,8 +62,11 @@ def signin():
 
     return jsonify({'message': 'User created'}), 201
 
+
 @app.route('/login', methods=['POST'])
 def login():
+
+    #Get data from request
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
@@ -70,29 +74,38 @@ def login():
     if not username or not password:
         return jsonify({'error': 'Username and password are required'}), 400
 
+    #Check username and password
     db = get_db()
     cursor = db.cursor()
     cursor.execute("SELECT * FROM User WHERE username = ?", (username,))
     user = cursor.fetchone()
 
     if user and bcrypt.checkpw(password.encode('utf-8'), user['password']):
-        # Générer le token JWT
+
+        # Generate JWT Token
         token = jwt.encode({
-            'username': user['username'],
             'userId': user['id'],
             'exp': datetime.utcnow() + timedelta(hours=1)
         }, app.config['SECRET_KEY'], algorithm='HS256')
+
         return jsonify({'token': token})
 
     return jsonify({'error': 'Invalid credentials'}), 400
 
 
+
+
+
+
+#Page routes
 @app.route('/page', methods=['POST'])
 def create_page():
     userId = authenticate_token()
+
     if not userId:
         return jsonify({'error': 'Unauthorized'}), 401
 
+    #Get data from request
     data = request.get_json()
     visible = data.get('visible')
     pageName = data.get('page_name')
@@ -101,21 +114,26 @@ def create_page():
     if(not (visible and pageName and description)):
         return jsonify({'error': 'All fields are required.'}), 400
 
+    
+    #Call to database
     db = get_db()
     cursor = db.cursor()
-
     try:
         cursor.execute("INSERT INTO Page (user_id, visible, page_name, description) VALUES (?, ?, ?, ?)", (userId, visible, pageName, description))
         db.commit()
         return jsonify({'message': 'Page created'}), 201
+    
     except sqlite3.IntegrityError:
         return jsonify({'error': 'User already have a page.'}), 404
+    
     except sqlite3.Error as e:
             return jsonify({'error': f'Database error: {str(e)}'}), 500
 
 
 @app.route('/page/<int:pageId>', methods=['GET'])
 def get_page(pageId):
+
+    #Call to database
     db = get_db()
     cursor = db.cursor()
     try:
@@ -133,29 +151,40 @@ def get_page(pageId):
 
     except sqlite3.IntegrityError:
         return jsonify({'error': 'Page does not exist'}), 404
+    
     except sqlite3.Error as e:
         return jsonify({'error': f'Database error: {str(e)}'}), 500
 
+
+
+
+
+#Disponibility routes
 @app.route('/page/<int:pageId>/disponibilities', methods=['POST'])
 def add_disponibility(pageId):
     userId = authenticate_token()
 
+    #Verify if logged user is the owner of the page
     db = get_db()
     cursor = db.cursor()
+    cursor.execute("SELECT user_id FROM Page WHERE id = ?", (pageId,))
+    result = cursor.fetchone()
+
+    if not result:
+        return jsonify({'error': 'Page does not exist'}), 404
+
+    if not userId or not (result["user_id"] == userId):
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    #Get data from request
+    data = request.get_json()
+    date = data.get('date')
+
+    if(not (pageId and date)):
+        return jsonify({'error': 'All fields are required.'}), 400
+    
+    #Call to database
     try:
-        cursor.execute("SELECT user_id FROM Page WHERE id = ?", (pageId,))
-        result = cursor.fetchone()
-
-        if not userId or not (result["user_id"] == userId):
-            return jsonify({'error': 'Unauthorized'}), 401
-
-        data = request.get_json()
-        date = data.get('date')
-        
-
-        if(not (pageId and date)):
-            return jsonify({'error': 'All fields are required.'}), 400
-
         cursor.execute("INSERT INTO Disponibility (date, page_id) VALUES (?, ?)", (date, pageId))
         db.commit()
 
@@ -163,8 +192,10 @@ def add_disponibility(pageId):
 
     except sqlite3.IntegrityError:
         return jsonify({'error': 'Page does not exist'}), 404
+    
     except sqlite3.Error as e:
         return jsonify({'error': f'Database error: {str(e)}'}), 500
+
 
 @app.route('/page/<int:pageId>/disponibilities/<int:disponibilityId>', methods=['POST', "DELETE"])
 def post_disponibility(pageId, disponibilityId):
@@ -178,9 +209,11 @@ def post_disponibility(pageId, disponibilityId):
         if(not (name and mail)):
             return jsonify({'error': 'All fields are required.'}), 400
 
+        #Generate cancel code
         characters = string.ascii_letters + string.digits
-        cancel_code = ''.join(random.choice(characters) for _ in range(20))
+        cancelCode = ''.join(random.choice(characters) for _ in range(20))
 
+        #Call to database
         db = get_db()
         cursor = db.cursor()
         try:
@@ -188,8 +221,10 @@ def post_disponibility(pageId, disponibilityId):
             db.commit()
 
             return jsonify({'message': 'Booked'}), 201
+        
         except sqlite3.IntegrityError:
             return jsonify({'error': 'Disponibility or page does not exist'}), 404
+        
         except sqlite3.Error as e:
             return jsonify({'error': f'Database error: {str(e)}'}), 500
 
@@ -198,14 +233,19 @@ def post_disponibility(pageId, disponibilityId):
 
         userId = authenticate_token()
 
+        #Verify if logged user is the owner of the page
         db = get_db()
         cursor = db.cursor()
         cursor.execute("SELECT user_id FROM Page WHERE id = ?", (pageId,))
         result = cursor.fetchone()
 
+        if not result:
+            return jsonify({'error': 'Page does not exist'}), 404
+
         if not userId or not (result["user_id"] == userId):
             return jsonify({'error': 'Unauthorized'}), 401
 
+        #Call to database
         try:
             cursor.execute("DELETE FROM Disponibility WHERE id = ? AND page_id = ?", (disponibilityId, pageId))
             db.commit()
@@ -213,11 +253,15 @@ def post_disponibility(pageId, disponibilityId):
             return jsonify({'message': 'Disponibility deleted.'}), 201
 
         except sqlite3.IntegrityError:
-            return jsonify({'error': 'Disponibility or page does not exist'}), 404
+            return jsonify({'error': 'Disponibility does not exist'}), 404
+        
         except sqlite3.Error as e:
             return jsonify({'error': f'Database error: {str(e)}'}), 500
 
-init_db()
+
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
