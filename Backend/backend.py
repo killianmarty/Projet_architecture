@@ -46,7 +46,7 @@ def inscription():
 
         if response.status_code == 201:
             flash("Inscription réussie !", "success")
-            return redirect(url_for("connexion.html"))  # Redirige vers la page de connexion après inscription
+            return redirect(url_for("connexion"))  # Redirige vers la page de connexion après inscription
         else:
             flash("Erreur lors de l'inscription. Veuillez réessayer.", "danger")
 
