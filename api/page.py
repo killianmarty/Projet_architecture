@@ -22,18 +22,30 @@ def get_page(pageId):
         return jsonify({'error': f'Database error: {str(e)}'}), 500
 
 
+def get_user_page(userId):
+    try:
+        page = executeQuery("SELECT * FROM Page WHERE user_id = ?", (userId,))
 
+        page_data = {
+            "id": page['id'],
+            "page_name": page['page_name'],
+            "description": page['description'],
+            "visible": page['visible']
+        }
 
-def create_page(pageName, description, visible):
-    userId = authenticate_token()
+        return jsonify(page_data), 201
 
-    #Verify if logged user is the owner of the page
-    if not userId:
-        return jsonify({'error': 'Unauthorized'}), 401
+    except sqlite3.IntegrityError:
+        return jsonify({'error': 'User does not have a page'}), 404
+    
+    except sqlite3.Error as e:
+        return jsonify({'error': f'Database error: {str(e)}'}), 500
 
-    if(not visible or not pageName or not description):
+def create_page(userId, pageName, description, visible):
+
+    #Check if all inputs are defined
+    if(userId is None or visible is None or pageName is None or description is None):
         return jsonify({'error': 'All fields are required.'}), 400
-
     
     #Call to database
     try:

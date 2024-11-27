@@ -36,7 +36,13 @@ def signin(username, password, firstName, lastName):
     #Call to database
     executeUpdate("INSERT INTO User (firstName, lastName, username, password) VALUES (?, ?, ?, ?)", (firstName, lastName, username, hashed_password,))
 
-    return jsonify({'message': 'User created'}), 201
+    loginResult = login(username, password)
+   
+    if(loginResult[1] == 201):
+        loginResultJSON = loginResult[0].json
+        return jsonify({'message': 'User created', 'token': loginResultJSON['token'], 'userId': loginResultJSON['userId']}), 201
+    else:
+        return jsonify({'message': 'Cannot login to new user'}), 400
 
 
 
@@ -57,6 +63,6 @@ def login(username, password):
             'exp': datetime.utcnow() + timedelta(hours=1)
         }, SECRET_KEY, algorithm='HS256')
 
-        return jsonify({'token': token})
+        return jsonify({'token': token, 'userId': user['id']}), 201
 
     return jsonify({'error': 'Invalid credentials'}), 400

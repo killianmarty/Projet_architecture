@@ -18,7 +18,13 @@ def signin_controller():
     firstName = data.get('first_name')
     lastName = data.get('last_name')
 
-    return signin(username, password, firstName, lastName)
+    signinResult = signin(username, password, firstName, lastName)
+    
+    if(signinResult[1] == 201):
+        return create_page(signinResult[0].json['userId'], firstName + " " + lastName, "Description", False)
+    else:
+        print("erreur")
+        return signinResult
 
 
 @app.route('/login', methods=['POST'])
@@ -30,15 +36,20 @@ def login_controller():
     return login(username, password)
 
 
-@app.route('/page', methods=['POST'])
+@app.route('/page', methods=['GET', 'POST'])
 def page_controller():
 
-    data = request.get_json()
-    visible = data.get('visible')
-    pageName = data.get('page_name')
-    description = data.get('description')
+    if(request.method == 'POST'):
+        data = request.get_json()
+        visible = data.get('visible')
+        pageName = data.get('page_name')
+        description = data.get('description')
 
-    return create_page(pageName, description, visible)
+        return update_page(pageName, description, visible)
+    else:
+        userId = authenticate_token()
+        return get_user_page(userId)
+
 
 
 @app.route('/page/<int:pageId>', methods=['GET'])
