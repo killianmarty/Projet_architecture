@@ -45,8 +45,9 @@ def page_controller():
         visible = data.get('visible')
         pageName = data.get('page_name')
         description = data.get('description')
+        activity = data.get('activity')
 
-        return update_page(pageName, description, visible)
+        return update_page(pageName, description, activity, visible)
     else:
         userId = authenticate_token()
         return get_user_page(userId)

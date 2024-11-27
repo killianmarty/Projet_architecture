@@ -10,6 +10,7 @@ def get_page(pageId):
             "id": page['id'],
             "page_name": page['page_name'],
             "description": page['description'],
+            "activity" : page['activty'],
             "visible": page['visible']
         }
 
@@ -30,6 +31,7 @@ def get_user_page(userId):
             "id": page['id'],
             "page_name": page['page_name'],
             "description": page['description'],
+            "activity" : page['activty'],
             "visible": page['visible']
         }
 
@@ -41,15 +43,15 @@ def get_user_page(userId):
     except sqlite3.Error as e:
         return jsonify({'error': f'Database error: {str(e)}'}), 500
 
-def create_page(userId, pageName, description, visible):
+def create_page(userId, pageName, description, activity, visible):
 
     #Check if all inputs are defined
-    if(userId is None or visible is None or pageName is None or description is None):
+    if(userId is None or visible is None or pageName is None or description is None or activity is None):
         return jsonify({'error': 'All fields are required.'}), 400
     
     #Call to database
     try:
-        executeUpdate("INSERT INTO Page (user_id, visible, page_name, description) VALUES (?, ?, ?, ?)", (userId, visible, pageName, description))
+        executeUpdate("INSERT INTO Page (user_id, visible, page_name, description, activity) VALUES (?, ?, ?, ?, ?)", (userId, visible, pageName, description, activity))
         return jsonify({'message': 'Page created'}), 201
 
     except sqlite3.IntegrityError:
@@ -57,3 +59,7 @@ def create_page(userId, pageName, description, visible):
     
     except sqlite3.Error as e:
         return jsonify({'error': f'Database error: {str(e)}'}), 500
+
+def update_page(pageName, description, activity, visible){
+    return None
+}
