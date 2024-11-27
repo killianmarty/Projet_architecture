@@ -23,7 +23,7 @@ def create_disponibility(pageId, date):
     #Call to database
     try:
         executeUpdate("INSERT INTO Disponibility (date, page_id) VALUES (?, ?)", (date, pageId,))
-        return jsonify({'message': 'Disponibility created'}), 201
+        return jsonify({'message': 'Disponibility created'}), 200
 
     except sqlite3.IntegrityError:
         return jsonify({'error': 'Page does not exist'}), 404
@@ -46,7 +46,7 @@ def book_disponibility(pageId, disponibilityId, name, mail):
     #Call to database
     try:
         executeUpdate("INSERT INTO Booking (disponibility_id, cancel_code, mail, name)", (disponibilityId, cancelCode, mail, name))
-        return jsonify({'message': 'Booked'}), 201
+        return jsonify({'message': 'Booked'}), 200
     
     except sqlite3.IntegrityError:
         return jsonify({'error': 'Disponibility or page does not exist'}), 404
@@ -73,7 +73,7 @@ def delete_disponibility(pageId, disponibilityId):
     #Call to database
     try:
         executeUpdate("DELETE FROM Disponibility WHERE id = ? AND page_id = ?", (disponibilityId, pageId,))
-        return jsonify({'message': 'Disponibility deleted.'}), 201
+        return jsonify({'message': 'Disponibility deleted.'}), 200
 
     except sqlite3.IntegrityError:
         return jsonify({'error': 'Disponibility does not exist'}), 404

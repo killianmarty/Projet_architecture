@@ -21,9 +21,10 @@ def signin_controller():
     signinResult = signin(username, password, firstName, lastName)
     
     #Create a page for the new user if the signin succeed
-    if(signinResult[1] == 201):
+    if(signinResult[1] == 200):
         
-        create_page(signinResult[0].json['userId'], firstName + " " + lastName, "Description", False)
+        createPageResult = create_page(signinResult[0].json['userId'], firstName + " " + lastName, "Description", "Activity", False)
+        print(createPageResult[0].json)
     
     return signinResult
 
@@ -46,7 +47,7 @@ def page_controller():
         pageName = data.get('page_name')
         description = data.get('description')
         activity = data.get('activity')
-
+        print(pageName, description, activity, visible)
         return update_page(pageName, description, activity, visible)
     else:
         userId = authenticate_token()

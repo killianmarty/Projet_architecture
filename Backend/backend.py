@@ -7,6 +7,15 @@ app.secret_key = "supersecretkey"  # Nécessaire pour les messages flash
 # URL de l'API (assurez-vous qu'il correspond à votre serveur API Flask)
 API_URL = "http://127.0.0.1:5000"
 
+def getAuthorizationHeader():
+    token = session.get('token')
+    if(not token):
+        return None
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+    return headers
+
 @app.route("/")
 def home():
     return render_template("accueil.html")
@@ -22,6 +31,10 @@ def connexion():
         
         if response.status_code == 200:
             flash("Connexion réussie.", "success")
+
+            token = response.json().get('token')
+            session['token'] = token
+
             return redirect(url_for("professionnel"))  # Remplacez par la route réelle du dashboard
         else:
             flash("Identifiants incorrects.", "danger")
@@ -44,8 +57,12 @@ def inscription():
             "password": password
         })
 
-        if response.status_code == 201:
+        if response.status_code == 200:
             flash("Inscription réussie !", "success")
+
+            token = response.json().get('token')
+            session['token'] = token
+
             return redirect(url_for("professionnel"))  # Redirige vers la page de connexion après inscription
         else:
             flash("Erreur lors de l'inscription. Veuillez réessayer.", "danger")
@@ -56,11 +73,15 @@ def inscription():
 def disponibilites(pageId):
     if request.method == "POST":
         date = request.form["date"]
+
+        header = getAuthorizationHeader()
+        if(header is None):
+            return redirect(url_for("connexion"))
         
         # Appel API pour ajouter une disponibilité
-        response = requests.post(f"{API_URL}/page/{pageId}/disponibilities", json={"date": date})
+        response = requests.post(f"{API_URL}/page/{pageId}/disponibilities", json={"date": date}, headers=header)
         
-        if response.status_code == 201:
+        if response.status_code == 200:
             flash("Disponibilité ajoutée.", "success")
         else:
             flash("Erreur lors de l'ajout de la disponibilité.", "danger")
@@ -79,6 +100,10 @@ def disponibilites(pageId):
 
 @app.route("/page", methods=["GET", "POST"])
 def professionnel():
+    header = getAuthorizationHeader()
+    if(header is None):
+        return redirect(url_for("connexion"))
+
     if request.method == "POST":
 
         page_name = request.form["page_name"]
@@ -86,32 +111,36 @@ def professionnel():
         visible = request.form["visible"] == 'true' 
         activity = request.form["activity"]
 
+
         response = requests.post(f"{API_URL}/page",json={
-            "Description" : description,
+            "description" : description,
             "page_name" : page_name,
             "visible" : visible,
             "activity" : activity
 
-        })
+        }, headers=header)
 
-    response = requests.get(f"{API_URL}/page")
+    
+
+    response = requests.get(f"{API_URL}/page", headers=header)
     if response.status_code == 200:
         page_data = response.json()  # Récupère les données au format JSON
+        print(page_data)
         return render_template("professionnel.html",  page_name=page_data['page_name'],  description=page_data['description'], visible=page_data['visible'],activity=page_data['activity'])
     else:
                 # Si la page n'existe pas ou une erreur se produit, on retourne une page d'erreur ou des données par défaut
-        return render_template("professionnel.html",  page_name="Erreur",  description="Page introuvable", visible=True, activity="chomeur")
+        return "404"
        
-@app.route("/page/<int:pageId>", methods=["GET", "POST"])
-def pro():
+@app.route("/page/<int:pageId>", methods=["GET"])
+def pro(pageId):
    
-    response = requests.get(f"{API_URL}/page/<int:pageId>")
+    response = requests.get(f"{API_URL}/page/{pageId}")
     if response.status_code == 200:
         page_data = response.json()  # Récupère les données au format JSON
         return render_template("professionnel.html",  page_name=page_data['page_name'],  description=page_data['description'], visible=page_data['visible'],activity=page_data['activity'])
     else:
                 # Si la page n'existe pas ou une erreur se produit, on retourne une page d'erreur ou des données par défaut
-        return render_template("professionnel.html",  page_name="Erreur",  description="Page introuvable", visible=True, activity="chomeur")
+        return "404"
          
 
 
