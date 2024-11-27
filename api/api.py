@@ -20,11 +20,12 @@ def signin_controller():
 
     signinResult = signin(username, password, firstName, lastName)
     
+    #Create a page for the new user if the signin succeed
     if(signinResult[1] == 201):
-        return create_page(signinResult[0].json['userId'], firstName + " " + lastName, "Description", False)
-    else:
-        print("erreur")
-        return signinResult
+        
+        create_page(signinResult[0].json['userId'], firstName + " " + lastName, "Description", False)
+    
+    return signinResult
 
 
 @app.route('/login', methods=['POST'])

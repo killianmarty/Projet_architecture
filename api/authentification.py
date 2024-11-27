@@ -36,6 +36,7 @@ def signin(username, password, firstName, lastName):
     #Call to database
     executeUpdate("INSERT INTO User (firstName, lastName, username, password) VALUES (?, ?, ?, ?)", (firstName, lastName, username, hashed_password,))
 
+    #Login to new user
     loginResult = login(username, password)
    
     if(loginResult[1] == 201):
