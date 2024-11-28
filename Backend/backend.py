@@ -161,7 +161,24 @@ def pro(pageId):
     else:
                 # Si la page n'existe pas ou une erreur se produit, on retourne une page d'erreur ou des données par défaut
         return "404"
+
+@app.route("/page/<int:pageId>/disponibilite/<int:disponibilityId>", methods=["POST"])
+def page_id_disponibilities_controller_id(pageId, disponibilityId):
+   
+    data = request.get_json()
+    name = data.get('name')
+    mail = data.get('mail')
+
+    response = requests.post(f"{API_URL}/page/{pageId}/disponibilities/{disponibilityId}", json={"date": date})
+    if(response.status_code == 200):
+        flash("Réservation ajoutée.", "success")
+        return render_template("reservation.html", logged=(session.get('token') is not None), sucessData={"name": name, "mail": mail, "cancel_code": response["cancel_code"]})
+    else:
+        flash("Impossible d'ajouter la réservation.", "danger")
+        return render_template("reservation.html", logged=(session.get('token') is not None), errorData={"message": "La réservation est déjà prise."})
+
     
+
 @app.route("/page/disponibilite", methods=["POST"])
 def ajout_disponibilite():
     header = getAuthorizationHeader()

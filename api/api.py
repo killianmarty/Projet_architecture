@@ -86,7 +86,7 @@ def page_id_disponibilities_id_controller(pageId, disponibilityId):
     name = data.get('name')
     mail = data.get('mail')
 
-    book_disponibility(pageId, disponibilityId, name, mail)
+    return book_disponibility(pageId, disponibilityId, name, mail)
 
 @app.route('/search', methods=["GET"])
 def search_query_controler():

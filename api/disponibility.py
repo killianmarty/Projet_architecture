@@ -46,8 +46,13 @@ def book_disponibility(pageId, disponibilityId, name, mail):
 
     #Call to database
     try:
-        executeUpdate("INSERT INTO Booking (disponibility_id, cancel_code, mail, name)", (disponibilityId, cancelCode, mail, name))
-        return jsonify({'message': 'Booked'}), 200
+        #check if disponibility is free
+        results = executeQueryAll("SELECT * FROM Booking WHERE disponibility_id = ?;", (disponibilityId,))
+        if(len(results) == 0):
+            executeUpdate("INSERT INTO Booking (disponibility_id, cancel_code, mail, name)", (disponibilityId, cancelCode, mail, name))
+            return jsonify({'message': 'Booked', 'cancel_code': cancelCode}), 200
+        else:
+            return jsonify({'error': 'Disponibility already booked.'}), 400
     
     except sqlite3.IntegrityError:
         return jsonify({'error': 'Disponibility or page does not exist'}), 404
