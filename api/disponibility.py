@@ -3,22 +3,23 @@ import string
 from authentification import *
 from flask import jsonify
 
-def create_disponibility(pageId, date):
+def create_disponibility(date):
     userId = authenticate_token()
 
-    if(not (pageId and date)):
+    if(userId is None):
+        return jsonify({'error': 'Unauthorized'}), 401
+
+    if(date is None):
         return jsonify({'error': 'All fields are required.'}), 400
     
 
     #Verify if logged user is the owner of the page
-    result = executeQuery("SELECT user_id FROM Page WHERE id = ?", (pageId,))
+    result = executeQuery("SELECT id FROM Page WHERE user_id = ?", (userId,))
 
     if not result:
         return jsonify({'error': 'Page does not exist'}), 404
     
-    if not userId or not (result["user_id"] == userId):
-        return jsonify({'error': 'Unauthorized'}), 401
-
+    pageId = result["id"]
     
     #Call to database
     try:
@@ -58,17 +59,20 @@ def book_disponibility(pageId, disponibilityId, name, mail):
 
 
     
-def delete_disponibility(pageId, disponibilityId):
+def delete_disponibility(disponibilityId):
     userId = authenticate_token()
 
+    if(userId is None):
+        return jsonify({'error': 'Unauthorized'}), 401
+
+
     #Verify if logged user is the owner of the page
-    result = executeQuery("SELECT user_id FROM Page WHERE id = ?", (pageId,))
+    result = executeQuery("SELECT id FROM Page WHERE user_id = ?", (userId,))
 
     if not result:
         return jsonify({'error': 'Page does not exist'}), 404
-
-    if not userId or not (result["user_id"] == userId):
-        return jsonify({'error': 'Unauthorized'}), 401
+    
+    pageId = result["id"]
 
     #Call to database
     try:
@@ -77,6 +81,33 @@ def delete_disponibility(pageId, disponibilityId):
 
     except sqlite3.IntegrityError:
         return jsonify({'error': 'Disponibility does not exist'}), 404
+    
+    except sqlite3.Error as e:
+        return jsonify({'error': f'Database error: {str(e)}'}), 500
+    
+def get_user_disponibilities():
+    userId = authenticate_token()
+
+    if(userId is None):
+        return jsonify({'error': 'Unauthorized'}), 401
+
+
+    #Verify if logged user is the owner of the page
+    result = executeQuery("SELECT id FROM Page WHERE user_id = ?", (userId,))
+
+    if not result:
+        return jsonify({'error': 'Page does not exist'}), 404
+    
+    return get_disponibilities(result["id"])
+
+def get_disponibilities(pageId):
+    try:
+        result = executeQueryAll("SELECT * FROM Disponibility WHERE page_id = ?", (pageId,))
+        res = [dict(row) for row in result]
+        return jsonify(res), 200
+
+    except sqlite3.IntegrityError:
+        return jsonify({'error': 'Page does not exist'}), 404
     
     except sqlite3.Error as e:
         return jsonify({'error': f'Database error: {str(e)}'}), 500

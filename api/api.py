@@ -61,29 +61,33 @@ def get_id_controller(pageId):
     return get_page(pageId)
 
 
-@app.route('/page/<int:pageId>/disponibilities', methods=['POST'])
+@app.route('/page/disponibilities', methods=['GET','POST'])
+def page_disponibilities_controller():
+    if(request.method == 'GET'):
+        return get_user_disponibilities()
+    else:
+        data = request.get_json()
+        date = data.get('date')
+
+        return create_disponibility(date)
+    
+@app.route('/page/disponibilities/<int:disponibilityId>', methods=['DELETE'])
+def page_disponibilities_id_controller(disponibilityId):
+    return delete_disponibility(disponibilityId)
+
+
+@app.route('/page/<int:pageId>/disponibilities', methods=['GET'])
 def page_id_disponibilities_controller(pageId):
+    return get_disponibilities(pageId)
 
-    data = request.get_json()
-    date = data.get('date')
-
-    return create_disponibility(pageId, date)
-
-
-@app.route('/page/<int:pageId>/disponibilities/<int:disponibilityId>', methods=['POST', "DELETE"])
+@app.route('/page/<int:pageId>/disponibilities/<int:disponibilityId>', methods=['POST'])
 def page_id_disponibilities_id_controller(pageId, disponibilityId):
 
-    if(request.method == 'POST'):
+    data = request.get_json()
+    name = data.get('name')
+    mail = data.get('mail')
 
-        data = request.get_json()
-        name = data.get('name')
-        mail = data.get('mail')
-
-        book_disponibility(pageId, disponibilityId, name, mail)
-
-    elif(request.method == 'DELETE'):
-
-        delete_disponibility(pageId, disponibilityId)
+    book_disponibility(pageId, disponibilityId, name, mail)
 
 
 

@@ -17,6 +17,14 @@ def executeQuery(query, args=()):
 
     return result
 
+def executeQueryAll(query, args=()):
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute(query, args)
+    result = cursor.fetchall()
+
+    return result
+
 def executeUpdate(query, args=()):
     db = get_db()
     cursor = db.cursor()

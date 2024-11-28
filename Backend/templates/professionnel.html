@@ -67,18 +67,10 @@
                 <h2>Disponibilités</h2>
                 <ul class="list-group" id="availability-list">
                     <!-- Liste des disponibilités -->
-                    {% for disponibilite in disponibilites %}
+                    {% for disponibility in disponibilities %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Lundi 10h00 - 12h00
-                        <a href="#" class="btn btn-danger btn-sm">Supprimer</a>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        Mardi 14h00 - 16h00
-                        <a href="#" class="btn btn-danger btn-sm">Supprimer</a>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        {{ disponibilite }}
-                        <a href="#" class="btn btn-danger btn-sm">Supprimer</a>
+                        {{ disponibility.date }}
+                        <a href="#" class="btn btn-danger btn-sm" onclick="deleteDisponibility({{ disponibility.id }})">Supprimer</a>
                     </li>
                     {% endfor %}
                 </ul>
@@ -89,14 +81,13 @@
     <!-- Formulaire d'Ajout de Disponibilité -->
     <div id="add-availability" class="container mt-5">
         <h3>Ajouter une Disponibilité</h3>
-        <form action="ajout_dispo" method="post">
+        <form action="/page/disponibilite" method="post">
             <div class="mb-3">
                 <label for="datetime" class="form-label">Date et Heure:</label>
-                <input type="datetime-local" id="datetime" class="form-control" required>
+                <input type="datetime-local" id="datetime" name="date" class="form-control" required>
             </div>
             <button type="submit" class="btn btn-primary">Ajouter</button>
         </form>
-        <a href="#availability-list" class="btn btn-secondary mt-3">Retour à la liste</a>
     </div>
 
     <!-- Formulaire de modification de page -->
@@ -142,6 +133,22 @@
             const form = document.getElementById("modification");
             form.style.display = "none"; // Masque le formulaire
         });
+
+        function deleteDisponibility(id){
+            fetch(`/page/disponibilite/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                location.reload(); // Recharger la page après suppression
+            })
+            .catch(error => {
+                console.error('Erreur:', error);
+                alert('Erreur lors de la suppression de la disponibilité.');
+            });
+        }
     </script>
 </body>
 </html>
