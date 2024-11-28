@@ -155,7 +155,7 @@ def pro(pageId):
         disponibilitesResponse = requests.get(f"{API_URL}/page/{pageId}/disponibilities")
         disponibilities = {}
         if disponibilitesResponse.status_code == 200:
-            disponibilities["free"] = [{"date": isoDateToHumanDate(dispo['date']), "id": dispo['id']} for dispo in (disponibilitesResponse.json())["free"]]
+            disponibilities["free"] = [{"date": isoDateToHumanDate(dispo['date']), "id": dispo['id'], "page_id": dispo["page_id"]} for dispo in (disponibilitesResponse.json())["free"]]
 
         return render_template("professionnel_public.html", logged=(session.get('token') is not None), page_name=page_data['page_name'],  description=page_data['description'], visible=page_data['visible'],activity=page_data['activity'], disponibilities=disponibilities)
     else:
@@ -169,13 +169,13 @@ def page_id_disponibilities_controller_id(pageId, disponibilityId):
     name = data.get('name')
     mail = data.get('mail')
 
-    response = requests.post(f"{API_URL}/page/{pageId}/disponibilities/{disponibilityId}", json={"date": date})
+    response = requests.post(f"{API_URL}/page/{pageId}/disponibilities/{disponibilityId}", json={"name": name, "mail": mail})
     if(response.status_code == 200):
         flash("Réservation ajoutée.", "success")
-        return render_template("reservation.html", logged=(session.get('token') is not None), sucessData={"name": name, "mail": mail, "cancel_code": response["cancel_code"]})
+        return {"name": name, "mail": mail, "cancel_code": response.json()["cancel_code"]}
     else:
         flash("Impossible d'ajouter la réservation.", "danger")
-        return render_template("reservation.html", logged=(session.get('token') is not None), errorData={"message": "La réservation est déjà prise."})
+        return {"message": "La réservation est déjà prise."}
 
     
 
@@ -218,6 +218,19 @@ def search():
         return render_template("recherche.html", logged=(session.get('token') is not None), results=results)
     else:
         return "Error, search not available."
+
+@app.route("/cancel", methods=["GET"])
+def cancel():
+    cancel_code = request.args.get("cancel_code")
+    if(cancel_code == None or cancel_code ==""):
+        return "No cancel code provided"
+
+    response = requests.delete(f"{API_URL}/cancel", json={"cancel_code": cancel_code})
+    if response.status_code == 200:
+        results = response.json()
+        return render_template("booking_deleted.html", logged=(session.get('token') is not None))
+    else:
+        return "Error, booking does not exist."
 
 @app.route("/logout")
 def logout():
