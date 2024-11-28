@@ -102,9 +102,15 @@ def get_user_disponibilities():
 
 def get_disponibilities(pageId):
     try:
-        result = executeQueryAll("SELECT * FROM Disponibility WHERE page_id = ?", (pageId,))
-        res = [dict(row) for row in result]
-        return jsonify(res), 200
+        unbooked = executeQueryAll("SELECT date, id FROM Disponibility LEFT JOIN Booking ON Disponibility.id = Booking.disponibility_id WHERE page_id = ? AND disponibility_id IS NULL", (pageId,))
+        res1 = [dict(row) for row in unbooked]
+
+        print(res1)
+
+        booked = executeQueryAll("SELECT date, id FROM Disponibility JOIN Booking ON Disponibility.id = Booking.disponibility_id WHERE page_id = ?", (pageId,))
+        res2 = [dict(row) for row in booked]
+
+        return jsonify({"booked": res2, "free": res1}), 200
 
     except sqlite3.IntegrityError:
         return jsonify({'error': 'Page does not exist'}), 404

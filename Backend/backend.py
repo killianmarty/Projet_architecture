@@ -136,10 +136,11 @@ def professionnel():
         page_data = response.json()  # Récupère les données au format JSON
         
         disponibilitesResponse = requests.get(f"{API_URL}/page/disponibilities", headers=header)
-        disponibilities = []
+        disponibilities = {}
         if disponibilitesResponse.status_code == 200:
-            disponibilities = [{"date": isoDateToHumanDate(dispo['date']), "id": dispo['id']} for dispo in disponibilitesResponse.json()]
-
+            disponibilities["booked"] = [{"date": isoDateToHumanDate(dispo['date']), "id": dispo['id']} for dispo in (disponibilitesResponse.json())["booked"]]
+            disponibilities["free"] = [{"date": isoDateToHumanDate(dispo['date']), "id": dispo['id']} for dispo in (disponibilitesResponse.json())["free"]]
+            print(disponibilities)
         return render_template("professionnel.html",  page_name=page_data['page_name'],  description=page_data['description'], visible=page_data['visible'],activity=page_data['activity'], disponibilities=disponibilities)
     else:
                 # Si la page n'existe pas ou une erreur se produit, on retourne une page d'erreur ou des données par défaut
@@ -153,9 +154,9 @@ def pro(pageId):
         page_data = response.json()  # Récupère les données au format JSON
 
         disponibilitesResponse = requests.get(f"{API_URL}/page/{pageId}/disponibilities")
-        disponibilities = []
+        disponibilities = {}
         if disponibilitesResponse.status_code == 200:
-            disponibilities = [{"date": isoDateToHumanDate(dispo['date']), "id": dispo['id']} for dispo in disponibilitesResponse.json()]
+            disponibilities["free"] = [{"date": isoDateToHumanDate(dispo['date']), "id": dispo['id']} for dispo in (disponibilitesResponse.json())["free"]]
             print(disponibilities)
 
         return render_template("professionnel_public.html",  page_name=page_data['page_name'],  description=page_data['description'], visible=page_data['visible'],activity=page_data['activity'], disponibilities=disponibilities)
