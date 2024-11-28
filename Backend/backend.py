@@ -27,7 +27,7 @@ def isoDateToHumanDate(isoDate):
 
 @app.route("/")
 def home():
-    return render_template("accueil.html")
+    return render_template("accueil.html", logged=(session.get('token') is not None))
 
 @app.route("/connexion", methods=["GET", "POST"])
 def connexion():
@@ -140,7 +140,7 @@ def professionnel():
         if disponibilitesResponse.status_code == 200:
             disponibilities["booked"] = [{"date": isoDateToHumanDate(dispo['date']), "id": dispo['id']} for dispo in (disponibilitesResponse.json())["booked"]]
             disponibilities["free"] = [{"date": isoDateToHumanDate(dispo['date']), "id": dispo['id']} for dispo in (disponibilitesResponse.json())["free"]]
-        return render_template("professionnel.html",  page_name=page_data['page_name'],  description=page_data['description'], visible=page_data['visible'],activity=page_data['activity'], disponibilities=disponibilities)
+        return render_template("professionnel.html", logged=(session.get('token') is not None), page_name=page_data['page_name'],  description=page_data['description'], visible=page_data['visible'],activity=page_data['activity'], disponibilities=disponibilities)
     else:
                 # Si la page n'existe pas ou une erreur se produit, on retourne une page d'erreur ou des données par défaut
         return "404"
@@ -157,7 +157,7 @@ def pro(pageId):
         if disponibilitesResponse.status_code == 200:
             disponibilities["free"] = [{"date": isoDateToHumanDate(dispo['date']), "id": dispo['id']} for dispo in (disponibilitesResponse.json())["free"]]
 
-        return render_template("professionnel_public.html",  page_name=page_data['page_name'],  description=page_data['description'], visible=page_data['visible'],activity=page_data['activity'], disponibilities=disponibilities)
+        return render_template("professionnel_public.html", logged=(session.get('token') is not None), page_name=page_data['page_name'],  description=page_data['description'], visible=page_data['visible'],activity=page_data['activity'], disponibilities=disponibilities)
     else:
                 # Si la page n'existe pas ou une erreur se produit, on retourne une page d'erreur ou des données par défaut
         return "404"
@@ -192,15 +192,26 @@ def supprimer_disponibilite(disponibilityId):
 @app.route("/search", methods=["GET"])
 def search():
     query = request.args.get("query")
-    if(query == None):
-        return "No query provided."
+    if(query == None or query ==""):
+        return render_template("recherche.html", logged=(session.get('token') is not None), results=[])
 
     response = requests.get(f"{API_URL}/search?query={query}")
     if response.status_code == 200:
         results = response.json()
-        return render_template("recherche.html", results=results)
+        return render_template("recherche.html", logged=(session.get('token') is not None), results=results)
     else:
         return "Error, search not available."
+
+@app.route("/logout")
+def logout():
+    # Supprimer le token de la session
+    session.pop('token', None)
+
+    # Message de confirmation de déconnexion
+    flash("Déconnexion réussie.", "success")
+
+    # Rediriger l'utilisateur vers la page d'accueil ou de connexion
+    return redirect(url_for("home"))
 
 if __name__ == "__main__":
     app.run(port=5001, debug=True)

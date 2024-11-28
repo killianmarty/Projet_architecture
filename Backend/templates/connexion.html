@@ -4,33 +4,78 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connexion - MK Réservation</title>
-    <link rel="stylesheet" href="../static/inscription.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Inclure Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-    <div class="background"></div> <!-- Arrière-plan dynamique -->
-    <div class="container">
-        <div class="form-wrapper">
-            <h2>Connexion</h2>
-            <form id="Connexion" action="/connexion" method="POST">
-                <label for="nom-utilisateur">Nom d'utilisateur :</label>
-                <input type="text" id="nom-utilisateur" name="nom-utilisateur" required placeholder="Entrez votre nom d'utilisateur">
+    <!-- Navbar Fixe -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">MK Réservation</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if logged %}
+                    <li class="nav-item">
+                        <a class="nav-link text-light" href="/page">Ma page</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-light" href="/logout">Se déconnecter</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link text-light" href="/inscription">S'inscrire</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-light" href="/connexion">Se connecter</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-                <label for="motdepasse">Mot de passe :</label>
-                <input type="password" id="motdepasse" name="motdepasse" required placeholder="Entrez votre mot de passe">
-
-                <div class="form-footer">
-                    <input type="submit" value="Se Connecter">
-                    <button type="button" onclick="goBack()">Retour</button>
+    <!-- Container pour la page de connexion -->
+    <div class="container" style="margin-top: 100px;">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="text-center">Connexion</h4>
+                    </div>
+                    <div class="card-body">
+                        <!-- Formulaire de Connexion -->
+                        <form action="/connexion" method="POST">
+                            <div class="mb-3">
+                                <label for="nom-utilisateur" class="form-label">Nom d'utilisateur :</label>
+                                <input type="text" id="nom-utilisateur" name="nom-utilisateur" class="form-control" required placeholder="Entrez votre nom d'utilisateur">
+                            </div>
+                            <div class="mb-3">
+                                <label for="motdepasse" class="form-label">Mot de passe :</label>
+                                <input type="password" id="motdepasse" name="motdepasse" class="form-control" required placeholder="Entrez votre mot de passe">
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <button type="submit" class="btn btn-primary">Se Connecter</button>
+                                <button type="button" class="btn btn-secondary" onclick="goBack()">Retour</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 
+    <!-- Script JS pour la fonction "Retour" -->
     <script>
         function goBack() {
             window.history.back();
         }
     </script>
+
+    <!-- Inclure Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
