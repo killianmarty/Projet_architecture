@@ -87,6 +87,14 @@ def page_id_disponibilities_id_controller(pageId, disponibilityId):
     mail = data.get('mail')
 
     return book_disponibility(pageId, disponibilityId, name, mail)
+        
+
+@app.route('/cancel', methods=["DELETE"])
+def cancel_controler():
+    data = request.get_json()
+    cancel_code = data['cancel_code']
+    print(cancel_code)
+    return free_disponibility(cancel_code)
 
 @app.route('/search', methods=["GET"])
 def search_query_controler():

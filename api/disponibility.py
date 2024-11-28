@@ -49,7 +49,8 @@ def book_disponibility(pageId, disponibilityId, name, mail):
         #check if disponibility is free
         results = executeQueryAll("SELECT * FROM Booking WHERE disponibility_id = ?;", (disponibilityId,))
         if(len(results) == 0):
-            executeUpdate("INSERT INTO Booking (disponibility_id, cancel_code, mail, name)", (disponibilityId, cancelCode, mail, name))
+            print(disponibilityId, cancelCode, mail, name)
+            executeUpdate("INSERT INTO Booking (disponibility_id, cancel_code, mail, name) VALUES (?, ?, ?, ?)", (disponibilityId, cancelCode, mail, name))
             return jsonify({'message': 'Booked', 'cancel_code': cancelCode}), 200
         else:
             return jsonify({'error': 'Disponibility already booked.'}), 400
@@ -61,8 +62,19 @@ def book_disponibility(pageId, disponibilityId, name, mail):
         return jsonify({'error': f'Database error: {str(e)}'}), 500
     
 
+def free_disponibility(cancel_code):
+    if(cancel_code is None):
+        return jsonify({'error': 'No cancel code provided.'}), 400
 
-
+    try:
+        executeUpdate("DELETE FROM Booking WHERE cancel_code = ?;", (cancel_code,))
+    except sqlite3.IntegrityError:
+        return jsonify({'error': 'Booking does not exist'}), 404
+    
+    except sqlite3.Error as e:
+        return jsonify({'error': f'Database error: {str(e)}'}), 500
+        
+    return jsonify({'message': "Booking cancelled."}), 200
     
 def delete_disponibility(disponibilityId):
     userId = authenticate_token()
@@ -107,10 +119,10 @@ def get_user_disponibilities():
 
 def get_disponibilities(pageId):
     try:
-        unbooked = executeQueryAll("SELECT date, id FROM Disponibility LEFT JOIN Booking ON Disponibility.id = Booking.disponibility_id WHERE page_id = ? AND disponibility_id IS NULL", (pageId,))
+        unbooked = executeQueryAll("SELECT date, id, page_id FROM Disponibility LEFT JOIN Booking ON Disponibility.id = Booking.disponibility_id WHERE page_id = ? AND disponibility_id IS NULL", (pageId,))
         res1 = [dict(row) for row in unbooked]
 
-        booked = executeQueryAll("SELECT date, id FROM Disponibility JOIN Booking ON Disponibility.id = Booking.disponibility_id WHERE page_id = ?", (pageId,))
+        booked = executeQueryAll("SELECT date, id, page_id FROM Disponibility JOIN Booking ON Disponibility.id = Booking.disponibility_id WHERE page_id = ?", (pageId,))
         res2 = [dict(row) for row in booked]
 
         return jsonify({"booked": res2, "free": res1}), 200
