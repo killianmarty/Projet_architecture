@@ -105,8 +105,6 @@ def get_disponibilities(pageId):
         unbooked = executeQueryAll("SELECT date, id FROM Disponibility LEFT JOIN Booking ON Disponibility.id = Booking.disponibility_id WHERE page_id = ? AND disponibility_id IS NULL", (pageId,))
         res1 = [dict(row) for row in unbooked]
 
-        print(res1)
-
         booked = executeQueryAll("SELECT date, id FROM Disponibility JOIN Booking ON Disponibility.id = Booking.disponibility_id WHERE page_id = ?", (pageId,))
         res2 = [dict(row) for row in booked]
 

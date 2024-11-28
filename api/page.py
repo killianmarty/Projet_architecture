@@ -6,7 +6,6 @@ def get_page(pageId):
     try:
         page = executeQuery("SELECT * FROM Page WHERE id = ?", (pageId,))
 
-        print(page["visible"])
         if(page["visible"] == '0'):
             return jsonify({'error': 'Page does not exist'}), 404
 
@@ -77,7 +76,7 @@ def update_page(pageName, description, activity, visible):
     
     #Call to database
     try:
-        executeUpdate("UPDATE Page SET visible = ?, page_name = ?, description = ?, activity = ? WHERE user_id = ?", (visible, pageName, description, activity, userId))
+        executeUpdate("UPDATE Page SET visible = ?, page_name = ?, description = ?, activity = ? WHERE user_id = ?;", (visible, pageName, description, activity, userId))
         return jsonify({'message': 'Page updated'}), 200
 
     except sqlite3.IntegrityError:
@@ -85,3 +84,13 @@ def update_page(pageName, description, activity, visible):
     
     except sqlite3.Error as e:
         return jsonify({'error': f'Database error: {str(e)}'}), 500
+
+
+def search_pages(query):
+    if(query == None):
+        return jsonify({'error': 'No query provided.'}), 404
+
+    results = executeQueryAll("SELECT * FROM Page WHERE page_name LIKE '%' || ? || '%' OR description LIKE '%' || ? || '%' OR activity LIKE '%' || ? || '%' COLLATE NOCASE;", (query, query, query, ))
+    searchResult = [{"id": result["id"], "page_name": result["page_name"], "description": result["description"], "activity": result["activity"]} for result in results if result["visible"] == "1"]
+    
+    return jsonify(searchResult), 200

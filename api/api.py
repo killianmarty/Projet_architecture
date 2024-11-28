@@ -24,7 +24,6 @@ def signin_controller():
     if(signinResult[1] == 200):
         
         createPageResult = create_page(signinResult[0].json['userId'], firstName + " " + lastName, "Description", "Activity", False)
-        print(createPageResult[0].json)
     
     return signinResult
 
@@ -89,7 +88,9 @@ def page_id_disponibilities_id_controller(pageId, disponibilityId):
 
     book_disponibility(pageId, disponibilityId, name, mail)
 
-
+@app.route('/search', methods=["GET"])
+def search_query_controler():
+    return search_pages(request.args.get("query"))
 
 if __name__ == '__main__':
     app.run(port = 5000, debug=True)
