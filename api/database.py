@@ -3,11 +3,13 @@ from mysql.connector import Error
 from flask import g
 
 # Configuration de la base de données
+import os
+
 DATABASE_CONFIG = {
-    'host': 'localhost',
-    'user': 'root',  # Remplace par ton utilisateur MySQL
-    'password': 'password',  # Remplace par ton mot de passe MySQL
-    'database': 'MkReservation'  # Remplace par le nom de ta base de données
+    'host': os.getenv('DB_HOST', 'mysql'),  # Par défaut, utilise le nom du service Docker "mysql"
+    'user': os.getenv('DB_USER', 'root'),  # Par défaut, utilisateur MySQL root
+    'password': os.getenv('DB_PASSWORD', 'password'),  # Par défaut, mot de passe MySQL
+    'database': os.getenv('DB_NAME', 'MkReservation')  # Par défaut, base de données MkReservation
 }
 
 def get_db():

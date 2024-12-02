@@ -1,0 +1,108 @@
+version: '3.8'
+
+services:
+  # API instances
+  api1:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: api1
+    environment:
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: password
+      DB_NAME: MkReservation
+    ports:
+      - "5000"
+    depends_on:
+      - mysql
+    networks:
+      - app_network
+      
+  api2:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: api2
+    environment:
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASSWORD: password
+      DB_NAME: MkReservation
+    ports:
+      - "5000"
+    depends_on:
+      - mysql
+    networks:
+      - app_network
+
+  # frontend instances
+  frontend1:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend1
+    ports:
+      - "5001"
+    depends_on:
+      - api1
+    networks:
+      - app_network
+      
+  frontend2:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend2
+    ports:
+      - "5001"
+    depends_on:
+      - api1
+    networks:
+      - app_network
+
+  # MySQL database
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-db
+    volumes:
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: MkReservation
+      MYSQL_USER: mysql
+      MYSQL_PASSWORD: password
+    ports:
+      - '3306'
+    expose:
+      - '3306'
+    networks:
+      - app_network
+
+  # Load balancer for API
+  nginx_api:
+    image: nginx:latest
+    container_name: nginx_api
+    volumes:
+      - ./nginx-api.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - api1
+    networks:
+      - app_network
+
+  # Load balancer for frontend
+  nginx_frontend:
+    image: nginx:latest
+    container_name: nginx_frontend
+    ports:
+      - "8080:80" # frontend load balancer accessible at localhost:8080
+    volumes:
+      - ./nginx-frontend.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - frontend1
+    networks:
+      - app_network
+
+networks:
+  app_network:
+    driver: bridge

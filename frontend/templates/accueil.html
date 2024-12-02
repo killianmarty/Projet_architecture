@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MK Réservation</title>
+    <!-- Lien vers Bootstrap pour la mise en page -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Lien vers le fichier CSS personnalisé -->
+    <link rel="stylesheet" href="../static/styles.css">
+</head>
+<body>
+
+    <!-- Navbar en haut -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">MK Réservation</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if logged %}
+                    <li class="nav-item">
+                        <a class="nav-link text-light" href="/page">Ma page</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-light" href="/logout">Se déconnecter</a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link text-light" href="/inscription">S'inscrire</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-light" href="/connexion">Se connecter</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+        <!-- Section de bienvenue -->
+        <section class="welcome-section text-center mt-5">
+            <div class="container">
+                <h1 class="display-4">Bienvenue sur MK Réservation</h1>
+                <p class="lead mb-4">Votre plateforme de réservation de rendez-vous avec des professionnels de confiance, à portée de main.</p>
+            </div>
+        </section>
+
+
+    <!-- Barre de recherche (toujours visible) -->
+    <div class="container mt-4">
+        <form action="/search" method="get" class="w-100">
+            <div class="input-group">
+                <input type="text" name="query" class="form-control" placeholder="Rechercher un professionnel..." id="searchInput" />
+                <button class="btn btn-primary" id="searchBtn" onclick="toggleSearch()">Rechercher</button>
+            </div>
+        </form>
+    </div>
+
+ 
+  
+    <!-- Lien vers Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Toggle pour afficher ou masquer la barre de recherche
+        function toggleSearch() {
+            const searchContainer = document.getElementById("searchInput");
+            searchContainer.focus(); // Ouvrir la barre de recherche automatiquement
+        }
+    </script>
+</body>
+</html>

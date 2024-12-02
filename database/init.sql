@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS `Page` (
 
 CREATE TABLE IF NOT EXISTS `Disponibility` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `date` INT NOT NULL,
+  `date` DATETIME NULL,
   `page_id` INT NOT NULL,
   PRIMARY KEY (`id`),
   FOREIGN KEY (`page_id`) REFERENCES `Page`(`id`)
