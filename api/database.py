@@ -6,16 +6,13 @@ from flask import g
 import os
 
 DATABASE_CONFIG = {
-    'host': os.getenv('DB_HOST', 'mysql'),  # Par défaut, utilise le nom du service Docker "mysql"
-    'user': os.getenv('DB_USER', 'root'),  # Par défaut, utilisateur MySQL root
-    'password': os.getenv('DB_PASSWORD', 'password'),  # Par défaut, mot de passe MySQL
-    'database': os.getenv('DB_NAME', 'MkReservation')  # Par défaut, base de données MkReservation
+    'host': os.getenv('DB_HOST', 'mysql'),
+    'user': os.getenv('DB_USER', 'root'),
+    'password': os.getenv('DB_PASSWORD', 'password'),
+    'database': os.getenv('DB_NAME', 'MkReservation')
 }
 
 def get_db():
-    """
-    Initialise une connexion à la base de données MySQL et la stocke dans le contexte global de Flask (g).
-    """
     if not hasattr(g, 'db'):
         try:
             g.db = mysql.connector.connect(
@@ -30,20 +27,14 @@ def get_db():
     return g.db
 
 def executeQuery(query, args=()):
-    """
-    Exécute une requête SELECT qui retourne une seule ligne.
-    """
     db = get_db()
-    cursor = db.cursor(dictionary=True)  # Utilisation de dictionary=True pour obtenir un résultat sous forme de dict
+    cursor = db.cursor(dictionary=True)
     cursor.execute(query, args)
     result = cursor.fetchone()
     cursor.close()
     return result
 
 def executeQueryAll(query, args=()):
-    """
-    Exécute une requête SELECT qui retourne toutes les lignes.
-    """
     db = get_db()
     cursor = db.cursor(dictionary=True)
     cursor.execute(query, args)
@@ -52,9 +43,6 @@ def executeQueryAll(query, args=()):
     return result
 
 def executeUpdate(query, args=()):
-    """
-    Exécute une requête d'insertion, de mise à jour ou de suppression.
-    """
     db = get_db()
     cursor = db.cursor()
     try:

@@ -11,7 +11,7 @@ def authenticate_token():
     if not token:
         return None
     try:
-        token = token.split(" ")[1]  # "Bearer <token>"
+        token = token.split(" ")[1]  # format : "Bearer <token>"
         decoded_token = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
         return decoded_token['userId']
     except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):

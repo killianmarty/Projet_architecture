@@ -5,9 +5,8 @@ import requests
 import pytz
 
 app = Flask(__name__)
-app.secret_key = "supersecretkey"  # Nécessaire pour les messages flash
+app.secret_key = "supersecretkey"
 
-# URL de l'API (assurez-vous qu'il correspond à votre serveur API Flask)
 API_URL = "http://nginx_api:81"
 
 def getAuthorizationHeader():
@@ -37,7 +36,6 @@ def connexion():
         username = request.form["nom-utilisateur"]
         password = request.form["motdepasse"]
 
-        # Appel à l'API pour vérifier la connexion
         response = requests.post(f"{API_URL}/login", json={"username": username, "password": password})
         
         if response.status_code == 200:
@@ -46,7 +44,7 @@ def connexion():
             token = response.json().get('token')
             session['token'] = token
 
-            return redirect(url_for("professionnel"))  # Remplacez par la route réelle du dashboard
+            return redirect(url_for("professionnel"))
         else:
             flash("Identifiants incorrects.", "danger")
 
@@ -60,7 +58,6 @@ def inscription():
         username = request.form["nom-utilisateur"]
         password = request.form["motdepasse"]
 
-        # Appel à l'API pour l'inscription
         response = requests.post(f"{API_URL}/signin", json={
             "first_name": prenom,
             "last_name": nom,
@@ -74,7 +71,7 @@ def inscription():
             token = response.json().get('token')
             session['token'] = token
 
-            return redirect(url_for("professionnel"))  # Redirige vers la page de connexion après inscription
+            return redirect(url_for("professionnel"))
         else:
             flash("Erreur lors de l'inscription. Veuillez réessayer.", "danger")
 
@@ -108,7 +105,7 @@ def professionnel():
 
     response = requests.get(f"{API_URL}/page", headers=header)
     if response.status_code == 200:
-        page_data = response.json()  # Récupère les données au format JSON
+        page_data = response.json()
         
         disponibilitesResponse = requests.get(f"{API_URL}/page/disponibilities", headers=header)
         disponibilities = {}
@@ -117,7 +114,6 @@ def professionnel():
             disponibilities["free"] = [{"date": isoDateToHumanDate(dispo['date']), "id": dispo['id']} for dispo in (disponibilitesResponse.json())["free"]]
         return render_template("professionnel.html", logged=(session.get('token') is not None), page_name=page_data['page_name'],  description=page_data['description'], visible=page_data['visible'],activity=page_data['activity'], disponibilities=disponibilities)
     else:
-                # Si la page n'existe pas ou une erreur se produit, on retourne une page d'erreur ou des données par défaut
         return "404"
        
 @app.route("/page/<int:pageId>", methods=["GET"])
@@ -125,7 +121,7 @@ def pro(pageId):
    
     response = requests.get(f"{API_URL}/page/{pageId}")
     if response.status_code == 200:
-        page_data = response.json()  # Récupère les données au format JSON
+        page_data = response.json()
 
         disponibilitesResponse = requests.get(f"{API_URL}/page/{pageId}/disponibilities")
         disponibilities = {}
@@ -134,7 +130,6 @@ def pro(pageId):
 
         return render_template("professionnel_public.html", logged=(session.get('token') is not None), page_name=page_data['page_name'],  description=page_data['description'], visible=page_data['visible'],activity=page_data['activity'], disponibilities=disponibilities)
     else:
-                # Si la page n'existe pas ou une erreur se produit, on retourne une page d'erreur ou des données par défaut
         return "404"
 
 @app.route("/page/<int:pageId>/disponibilite/<int:disponibilityId>", methods=["POST"])
@@ -211,11 +206,8 @@ def cancel():
 def logout():
     # Supprimer le token de la session
     session.pop('token', None)
-
-    # Message de confirmation de déconnexion
     flash("Déconnexion réussie.", "success")
 
-    # Rediriger l'utilisateur vers la page d'accueil ou de connexion
     return redirect(url_for("home"))
 
 if __name__ == "__main__":
