@@ -1,30 +1,13 @@
-import datetime
-import locale
-from flask import Flask, render_template, request, redirect, url_for, flash, session
-import requests
-import pytz
+from flask import Flask, render_template, request, redirect, url_for, session
+
+from authentification import *
+from page import *
+from disponibility import *
+from utils import *
 
 app = Flask(__name__)
 app.secret_key = "supersecretkey"
 
-API_URL = "http://nginx_api:81"
-
-def getAuthorizationHeader():
-    token = session.get('token')
-    if(not token):
-        return None
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-    return headers
-
-def isoDateToHumanDate(date_obj):
-    locale.setlocale(locale.LC_TIME, 'fr_FR.UTF-8')
-    toronto_tz = pytz.timezone('America/Toronto')
-    date_obj = datetime.datetime.strptime(date_obj, "%Y-%m-%d %H:%M:%S")
-
-    date_obj = date_obj.astimezone(toronto_tz)
-    return date_obj.strftime("%A %d %b %Y à %H:%M")
 
 @app.route("/")
 def home_controller():
@@ -33,47 +16,21 @@ def home_controller():
 @app.route("/connexion", methods=["GET", "POST"])
 def connection_controller():
     if request.method == "POST":
-        username = request.form["nom-utilisateur"]
-        password = request.form["motdepasse"]
-
-        response = requests.post(f"{API_URL}/login", json={"username": username, "password": password})
-        
-        if response.status_code == 200:
-            flash("Connexion réussie.", "success")
-
-            token = response.json().get('token')
-            session['token'] = token
-
+        login_result = login(request.form["nom-utilisateur"], request.form["motdepasse"])
+        if(login_result["success"]):
+            session['token'] = login_result["token"]
             return redirect(url_for("page_controller"))
-        else:
-            flash("Identifiants incorrects.", "danger")
 
     return render_template("connexion.html")
+
 
 @app.route("/inscription", methods=["GET", "POST"])
 def signin_controller():
     if request.method == "POST":
-        prenom = request.form["prenom"]
-        nom = request.form["nom"]
-        username = request.form["nom-utilisateur"]
-        password = request.form["motdepasse"]
-
-        response = requests.post(f"{API_URL}/signin", json={
-            "first_name": prenom,
-            "last_name": nom,
-            "username": username,
-            "password": password
-        })
-
-        if response.status_code == 200:
-            flash("Inscription réussie !", "success")
-
-            token = response.json().get('token')
-            session['token'] = token
-
+        signin_result = signin(request.form["prenom"], request.form["nom"], request.form["nom-utilisateur"], request.form["motdepasse"])
+        if(signin_result["success"]):
+            session['token'] = signin_result["token"]
             return redirect(url_for("page_controller"))
-        else:
-            flash("Erreur lors de l'inscription. Veuillez réessayer.", "danger")
 
     return render_template("inscription.html")
 
@@ -87,128 +44,73 @@ def page_controller():
 
     if request.method == "POST":
 
-        page_name = request.form["page_name"]
-        description = request.form["description"]
-        visible = request.form["visible"] == 'true' 
-        activity = request.form["activity"]
-
-
-        response = requests.post(f"{API_URL}/page",json={
-            "description" : description,
-            "page_name" : page_name,
-            "visible" : visible,
-            "activity" : activity
-
-        }, headers=header)
-
+        create_user_page_result = update_user_page(request.form["page_name"], request.form["description"], request.form["activity"], request.form["visible"] == 'true')
+        if(create_user_page_result["success"] == False):
+            return redirect(url_for("connection_controller"))
     
-
-    response = requests.get(f"{API_URL}/page", headers=header)
-    if response.status_code == 200:
-        page_data = response.json()
-        
-        disponibilitesResponse = requests.get(f"{API_URL}/page/disponibilities", headers=header)
-        disponibilities = {}
-        if disponibilitesResponse.status_code == 200:
-            disponibilities["booked"] = [{"date": isoDateToHumanDate(dispo['date']), "id": dispo['id']} for dispo in (disponibilitesResponse.json())["booked"]]
-            disponibilities["free"] = [{"date": isoDateToHumanDate(dispo['date']), "id": dispo['id']} for dispo in (disponibilitesResponse.json())["free"]]
-        return render_template("professionnel.html", logged=(session.get('token') is not None), page_name=page_data['page_name'],  description=page_data['description'], visible=page_data['visible'],activity=page_data['activity'], disponibilities=disponibilities)
+    get_user_page_result = get_user_page()
+    if(get_user_page_result["success"]):
+        return render_template("professionnel.html", logged=(session.get('token') is not None), page_name=get_user_page_result["page_data"]['page_name'],  description=get_user_page_result["page_data"]['description'], visible=get_user_page_result["page_data"]['visible'],activity=get_user_page_result["page_data"]['activity'], disponibilities=get_user_page_result["disponibilities"])
     else:
         return "404"
        
 @app.route("/page/<int:pageId>", methods=["GET"])
 def page_id_controller(pageId):
-   
-    response = requests.get(f"{API_URL}/page/{pageId}")
-    if response.status_code == 200:
-        page_data = response.json()
-
-        disponibilitesResponse = requests.get(f"{API_URL}/page/{pageId}/disponibilities")
-        disponibilities = {}
-        if disponibilitesResponse.status_code == 200:
-            disponibilities["free"] = [{"date": isoDateToHumanDate(dispo['date']), "id": dispo['id'], "page_id": dispo["page_id"]} for dispo in (disponibilitesResponse.json())["free"]]
-
-        return render_template("professionnel_public.html", logged=(session.get('token') is not None), page_name=page_data['page_name'],  description=page_data['description'], visible=page_data['visible'],activity=page_data['activity'], disponibilities=disponibilities)
+    get_page_by_id_result = get_page_by_id(pageId)
+    if(get_page_by_id_result["success"]):
+        return render_template("professionnel_public.html", logged=(session.get('token') is not None), page_name=get_page_by_id_result["page_data"]['page_name'],  description=get_page_by_id_result["page_data"]['description'], visible=get_page_by_id_result["page_data"]['visible'],activity=get_page_by_id_result["page_data"]['activity'], disponibilities=get_page_by_id_result["disponibilities"])
     else:
         return "404"
 
 @app.route("/page/<int:pageId>/disponibilite/<int:disponibilityId>", methods=["POST"])
 def page_id_disponibilities_controller_id(pageId, disponibilityId):
-   
     data = request.get_json()
-    name = data.get('name')
-    mail = data.get('mail')
-
-    response = requests.post(f"{API_URL}/page/{pageId}/disponibilities/{disponibilityId}", json={"name": name, "mail": mail})
-    if(response.status_code == 200):
-        flash("Réservation ajoutée.", "success")
-        return {"name": name, "mail": mail, "cancel_code": response.json()["cancel_code"]}
-    else:
-        flash("Impossible d'ajouter la réservation.", "danger")
-        return {"message": "La réservation est déjà prise."}
+    return book_disponibility(pageId, disponibilityId, data.get('name'), data.get('mail'))
 
     
 
 @app.route("/page/disponibilite", methods=["POST"])
 def page_disponibility_controller():
-    header = getAuthorizationHeader()
-    if(header is None):
-        return redirect(url_for("connection_controller"))
-
-    date = request.form["date"]
-    response = requests.post(f"{API_URL}/page/disponibilities", json={"date": date}, headers=header)
-    if response.status_code == 200:
-        flash("Disponibilité ajoutée.", "success")
+    create_disponibility_result = create_disponibility(request.form["date"])
+    if(create_disponibility_result["success"]):
+        return redirect(url_for("page_controller"))
     else:
-        flash("Erreur lors de l'ajout de la disponibilité.", "danger")
-    return redirect(url_for("page_controller"))
+        return redirect(url_for("connection_controller"))
 
 @app.route("/page/disponibilite/<int:disponibilityId>", methods=["DELETE"])
 def page_disponibility_id_controller(disponibilityId):
-    header = getAuthorizationHeader()
-    if(header is None):
-        return redirect(url_for("connection_controller"))
-
-    response = requests.delete(f"{API_URL}/page/disponibilities/{disponibilityId}", headers=header)
-    if response.status_code == 200:
-        flash("Disponibilité supprimée.", "success")
+    delete_disponibility_result = delete_disponibility(disponibilityId)
+    if(create_disponibility_result["success"]):
+        return redirect(url_for("page_controller"))
+    elif(create_disponibility_result["allowed"]):
+        return redirect(url_for("page_controller"))
     else:
-        flash("Erreur lors de la suppression de la disponibilité.", "danger")
-    return redirect(url_for("page_controller"))
+        return redirect(url_for("connection_controller"))
 
 @app.route("/search", methods=["GET"])
 def search_controller():
-    query = request.args.get("query")
-    if(query == None or query ==""):
-        return render_template("recherche.html", logged=(session.get('token') is not None), results=[])
-
-    response = requests.get(f"{API_URL}/search?query={query}")
-    if response.status_code == 200:
-        results = response.json()
-        return render_template("recherche.html", logged=(session.get('token') is not None), results=results)
+    search_pages_result = search_pages(request.args.get("query"))
+    if(search_pages_result["success"]):
+        return render_template("recherche.html", logged=(session.get('token') is not None), results=search_pages_result["results"])
     else:
         return "Error, search not available."
 
 @app.route("/cancel", methods=["GET"])
 def cancel_controller():
-    cancel_code = request.args.get("cancel_code")
-    if(cancel_code == None or cancel_code ==""):
-        return "No cancel code provided"
-
-    response = requests.delete(f"{API_URL}/cancel", json={"cancel_code": cancel_code})
-    if response.status_code == 200:
-        results = response.json()
+    free_disponibility_result = free_disponibility(request.args.get("cancel_code"))
+    if(free_disponibility_result["success"]):
         return render_template("booking_deleted.html", logged=(session.get('token') is not None))
     else:
-        return "Error, booking does not exist."
+        return free_disponibility_result["message"]
+
 
 @app.route("/logout")
 def logout_controller():
-    # Supprimer le token de la session
-    session.pop('token', None)
-    flash("Déconnexion réussie.", "success")
-
+    logout()
     return redirect(url_for("home_controller"))
+
+
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5001, debug=True)
