@@ -27,11 +27,11 @@ def isoDateToHumanDate(date_obj):
     return date_obj.strftime("%A %d %b %Y à %H:%M")
 
 @app.route("/")
-def home():
+def home_controller():
     return render_template("accueil.html", logged=(session.get('token') is not None))
 
 @app.route("/connexion", methods=["GET", "POST"])
-def connexion():
+def connection_controller():
     if request.method == "POST":
         username = request.form["nom-utilisateur"]
         password = request.form["motdepasse"]
@@ -44,14 +44,14 @@ def connexion():
             token = response.json().get('token')
             session['token'] = token
 
-            return redirect(url_for("professionnel"))
+            return redirect(url_for("page_controller"))
         else:
             flash("Identifiants incorrects.", "danger")
 
     return render_template("connexion.html")
 
 @app.route("/inscription", methods=["GET", "POST"])
-def inscription():
+def signin_controller():
     if request.method == "POST":
         prenom = request.form["prenom"]
         nom = request.form["nom"]
@@ -71,7 +71,7 @@ def inscription():
             token = response.json().get('token')
             session['token'] = token
 
-            return redirect(url_for("professionnel"))
+            return redirect(url_for("page_controller"))
         else:
             flash("Erreur lors de l'inscription. Veuillez réessayer.", "danger")
 
@@ -80,10 +80,10 @@ def inscription():
 
 
 @app.route("/page", methods=["GET", "POST"])
-def professionnel():
+def page_controller():
     header = getAuthorizationHeader()
     if(header is None):
-        return redirect(url_for("connexion"))
+        return redirect(url_for("connection_controller"))
 
     if request.method == "POST":
 
@@ -117,7 +117,7 @@ def professionnel():
         return "404"
        
 @app.route("/page/<int:pageId>", methods=["GET"])
-def pro(pageId):
+def page_id_controller(pageId):
    
     response = requests.get(f"{API_URL}/page/{pageId}")
     if response.status_code == 200:
@@ -150,10 +150,10 @@ def page_id_disponibilities_controller_id(pageId, disponibilityId):
     
 
 @app.route("/page/disponibilite", methods=["POST"])
-def ajout_disponibilite():
+def page_disponibility_controller():
     header = getAuthorizationHeader()
     if(header is None):
-        return redirect(url_for("connexion"))
+        return redirect(url_for("connection_controller"))
 
     date = request.form["date"]
     response = requests.post(f"{API_URL}/page/disponibilities", json={"date": date}, headers=header)
@@ -161,23 +161,23 @@ def ajout_disponibilite():
         flash("Disponibilité ajoutée.", "success")
     else:
         flash("Erreur lors de l'ajout de la disponibilité.", "danger")
-    return redirect(url_for("professionnel"))
+    return redirect(url_for("page_controller"))
 
 @app.route("/page/disponibilite/<int:disponibilityId>", methods=["DELETE"])
-def supprimer_disponibilite(disponibilityId):
+def page_disponibility_id_controller(disponibilityId):
     header = getAuthorizationHeader()
     if(header is None):
-        return redirect(url_for("connexion"))
+        return redirect(url_for("connection_controller"))
 
     response = requests.delete(f"{API_URL}/page/disponibilities/{disponibilityId}", headers=header)
     if response.status_code == 200:
         flash("Disponibilité supprimée.", "success")
     else:
         flash("Erreur lors de la suppression de la disponibilité.", "danger")
-    return redirect(url_for("professionnel"))
+    return redirect(url_for("page_controller"))
 
 @app.route("/search", methods=["GET"])
-def search():
+def search_controller():
     query = request.args.get("query")
     if(query == None or query ==""):
         return render_template("recherche.html", logged=(session.get('token') is not None), results=[])
@@ -190,7 +190,7 @@ def search():
         return "Error, search not available."
 
 @app.route("/cancel", methods=["GET"])
-def cancel():
+def cancel_controller():
     cancel_code = request.args.get("cancel_code")
     if(cancel_code == None or cancel_code ==""):
         return "No cancel code provided"
@@ -203,12 +203,12 @@ def cancel():
         return "Error, booking does not exist."
 
 @app.route("/logout")
-def logout():
+def logout_controller():
     # Supprimer le token de la session
     session.pop('token', None)
     flash("Déconnexion réussie.", "success")
 
-    return redirect(url_for("home"))
+    return redirect(url_for("home_controller"))
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5001, debug=True)
