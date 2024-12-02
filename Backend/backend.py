@@ -19,11 +19,13 @@ def getAuthorizationHeader():
     }
     return headers
 
-def isoDateToHumanDate(isoDate):
-    locale.setlocale(locale.LC_TIME, '')
-    date_obj = datetime.datetime.fromisoformat(isoDate)
-    date_obj = date_obj.astimezone(pytz.timezone('America/Toronto'))
-    return date_obj.strftime("%A %d %B %Y, %H:%M")
+def isoDateToHumanDate(date_obj):
+    locale.setlocale(locale.LC_TIME, 'fr_FR.UTF-8')
+    toronto_tz = pytz.timezone('America/Toronto')
+    date_obj = datetime.datetime.strptime(date_obj, "%Y-%m-%d %H:%M:%S")
+
+    date_obj = date_obj.astimezone(toronto_tz)
+    return date_obj.strftime("%A %d %b %Y à %H:%M")
 
 @app.route("/")
 def home():
@@ -78,34 +80,7 @@ def inscription():
 
     return render_template("inscription.html")
 
-# @app.route("/disponibilites/<int:pageId>", methods=["GET", "POST"])
-# def disponibilites(pageId):
-#     if request.method == "POST":
-#         date = request.form["date"]
 
-#         header = getAuthorizationHeader()
-#         if(header is None):
-#             return redirect(url_for("connexion"))
-        
-#         # Appel API pour ajouter une disponibilité
-#         response = requests.post(f"{API_URL}/page/{pageId}/disponibilities", json={"date": date}, headers=header)
-        
-#         if response.status_code == 200:
-#             flash("Disponibilité ajoutée.", "success")
-#         else:
-#             flash("Erreur lors de l'ajout de la disponibilité.", "danger")
-
-#         return redirect(url_for("disponibilites", pageId=pageId))
-
-#     # Récupérer les disponibilités pour la page donnée
-#     response = requests.get(f"{API_URL}/page/{pageId}")
-    
-#     if response.status_code == 200:
-#         disponibilites = response.json()
-#     else:
-#         disponibilites = []
-
-#     return render_template("disponibilites.html", disponibilites=disponibilites)
 
 @app.route("/page", methods=["GET", "POST"])
 def professionnel():

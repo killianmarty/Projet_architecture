@@ -23,7 +23,7 @@ def signin_controller():
     #Create a page for the new user if the signin succeed
     if(signinResult[1] == 200):
         
-        createPageResult = create_page(signinResult[0].json['userId'], firstName + " " + lastName, "Description", "Activity", False)
+        createPageResult = create_page(signinResult[0].json['userId'], firstName + " " + lastName, "Description", "Activity", "false")
     
     return signinResult
 
@@ -46,8 +46,8 @@ def page_controller():
         pageName = data.get('page_name')
         description = data.get('description')
         activity = data.get('activity')
-        print(pageName, description, activity, visible)
-        return update_page(pageName, description, activity, visible)
+
+        return update_page(pageName, description, activity, str(visible).lower())
     else:
         userId = authenticate_token()
         return get_user_page(userId)
@@ -67,7 +67,6 @@ def page_disponibilities_controller():
     else:
         data = request.get_json()
         date = data.get('date')
-
         return create_disponibility(date)
     
 @app.route('/page/disponibilities/<int:disponibilityId>', methods=['DELETE'])
@@ -93,7 +92,6 @@ def page_id_disponibilities_id_controller(pageId, disponibilityId):
 def cancel_controler():
     data = request.get_json()
     cancel_code = data['cancel_code']
-    print(cancel_code)
     return free_disponibility(cancel_code)
 
 @app.route('/search', methods=["GET"])

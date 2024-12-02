@@ -124,8 +124,8 @@
             <div class="mb-3">
                 <label for="visible" class="form-label">Visible</label>
                 <select id="visible" class="form-select" name="visible" required>
-                    <option value="true" {% if visible == "1" %}selected{% endif %}>Oui</option>
-                    <option value="false"{% if visible != "1" %}selected{% endif %}>Non</option>
+                    <option value="true" {% if visible == "true" %}selected{% endif %}>Oui</option>
+                    <option value="false"{% if visible != "true" %}selected{% endif %}>Non</option>
                 </select>
             </div>
             <button type="submit" class="btn btn-primary">Sauvegarder</button>

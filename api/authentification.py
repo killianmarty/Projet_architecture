@@ -26,7 +26,7 @@ def signin(username, password, firstName, lastName):
         return jsonify({'error': 'All fields are required.'}), 400
 
     #Check if user already exists
-    user = executeQuery("SELECT * FROM User WHERE username = ?", (username,))
+    user = executeQuery("SELECT * FROM User WHERE username = %s", (username,))
 
     if user:
         return jsonify({'error': 'User already exists'}), 400
@@ -34,7 +34,7 @@ def signin(username, password, firstName, lastName):
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
 
     #Call to database
-    executeUpdate("INSERT INTO User (firstName, lastName, username, password) VALUES (?, ?, ?, ?)", (firstName, lastName, username, hashed_password,))
+    executeUpdate("INSERT INTO User (firstName, lastName, username, password) VALUES (%s, %s, %s, %s)", (firstName, lastName, username, hashed_password,))
 
     #Login to new user
     loginResult = login(username, password)
@@ -49,15 +49,13 @@ def signin(username, password, firstName, lastName):
 
 
 def login(username, password):
-
     if not username or not password:
         return jsonify({'error': 'Username and password are required'}), 400
 
-    #Check username and password
-    user = executeQuery("SELECT * FROM User WHERE username = ?", (username,))
+    # Check username and password
+    user = executeQuery("SELECT * FROM User WHERE username = %s", (username,))
 
-    if user and bcrypt.checkpw(password.encode('utf-8'), user['password']):
-
+    if user and bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):  # Conversion ajoutée ici
         # Generate JWT Token
         token = jwt.encode({
             'userId': user['id'],
