@@ -6,10 +6,8 @@ from utils import *
 def book_disponibility(pageId, disponibilityId, name, mail):
 	response = requests.post(f"{API_URL}/page/{pageId}/disponibilities/{disponibilityId}", json={"name": name, "mail": mail})
 	if(response.status_code == 200):
-		flash("Réservation ajoutée.", "success")
 		return {"success": True, "name": name, "mail": mail, "cancel_code": response.json()["cancel_code"]}
 	else:
-		flash("Impossible d'ajouter la réservation.", "danger")
 		return {"success": False, "message": "La réservation est déjà prise."}
 
 def free_disponibility(cancelCode):
@@ -53,12 +51,10 @@ def delete_disponibility(disponibilityId):
 
 	response = requests.delete(f"{API_URL}/page/disponibilities/{disponibilityId}", headers=header)
 	if response.status_code == 200:
-		flash("Disponibilité supprimée.", "success")
 		return {
 			"success" : True
 		}
 	else:
-		flash("Erreur lors de la suppression de la disponibilité.", "danger")
 		return {
 			"success": False,
 			"allowed": True

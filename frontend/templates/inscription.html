@@ -47,7 +47,11 @@
                         <h4 class="text-center">Inscription</h4>
                     </div>
                     <div class="card-body">
-                        <!-- Formulaire d'Inscription -->
+                        {% if error %}
+                        <div class="alert alert-danger" role="alert">
+                            {{ error }}
+                        </div>
+                        {% endif %}
                         <form id="inscriptionForm" action="/inscription" method="POST">
                             <div class="mb-3">
                                 <label for="nom" class="form-label">Nom :</label>

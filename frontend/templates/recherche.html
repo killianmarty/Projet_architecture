@@ -60,7 +60,11 @@
 
     </div>
 
-    <!-- Résultats de recherche -->
+    {% if error %}
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+    {% endif %}
     <div class="container mt-4">
         {% if results %}
         <h3>Résultats trouvés :</h3>

@@ -47,7 +47,11 @@
                         <h4 class="text-center">Connexion</h4>
                     </div>
                     <div class="card-body">
-                        <!-- Formulaire de Connexion -->
+                        {% if error %}
+                        <div class="alert alert-danger" role="alert">
+                            {{ error }}
+                        </div>
+                        {% endif %}
                         <form action="/connexion" method="POST">
                             <div class="mb-3">
                                 <label for="nom-utilisateur" class="form-label">Nom d'utilisateur :</label>

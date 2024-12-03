@@ -28,6 +28,7 @@ def signin_controller():
     return signinResult
 
 
+
 @app.route('/login', methods=['POST'])
 def login_controller():
 
@@ -35,6 +36,7 @@ def login_controller():
     username = data.get('username')
     password = data.get('password')
     return login(username, password)
+
 
 
 @app.route('/page', methods=['GET', 'POST'])
@@ -56,8 +58,8 @@ def page_controller():
 
 @app.route('/page/<int:pageId>', methods=['GET'])
 def get_id_controller(pageId):
-
     return get_page(pageId)
+
 
 
 @app.route('/page/disponibilities', methods=['GET','POST'])
@@ -68,15 +70,20 @@ def page_disponibilities_controller():
         data = request.get_json()
         date = data.get('date')
         return create_disponibility(date)
+
     
+
 @app.route('/page/disponibilities/<int:disponibilityId>', methods=['DELETE'])
 def page_disponibilities_id_controller(disponibilityId):
     return delete_disponibility(disponibilityId)
 
 
+
 @app.route('/page/<int:pageId>/disponibilities', methods=['GET'])
 def page_id_disponibilities_controller(pageId):
     return get_disponibilities(pageId)
+
+
 
 @app.route('/page/<int:pageId>/disponibilities/<int:disponibilityId>', methods=['POST'])
 def page_id_disponibilities_id_controller(pageId, disponibilityId):
@@ -88,15 +95,21 @@ def page_id_disponibilities_id_controller(pageId, disponibilityId):
     return book_disponibility(pageId, disponibilityId, name, mail)
         
 
+
 @app.route('/cancel', methods=["DELETE"])
 def cancel_controler():
     data = request.get_json()
     cancel_code = data['cancel_code']
     return free_disponibility(cancel_code)
 
+
+
 @app.route('/search', methods=["GET"])
 def search_query_controler():
     return search_pages(request.args.get("query"))
+
+
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port = 5000, debug=True)

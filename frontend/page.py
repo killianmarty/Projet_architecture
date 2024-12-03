@@ -78,7 +78,8 @@ def search_pages(query):
             results = response.json()
         else:
             return {
-                "success": False
+                "success": False,
+                "message": "Error, search not available."
             }
 
     return {
