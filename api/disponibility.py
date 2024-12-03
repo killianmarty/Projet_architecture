@@ -36,7 +36,7 @@ def create_disponibility(date):
 
 
     
-def book_disponibility(pageId, disponibilityId, name, mail):
+def book_disponibility(disponibilityId, name, mail):
     if(not (name and mail)):
         return jsonify({'error': 'All fields are required.'}), 400
 

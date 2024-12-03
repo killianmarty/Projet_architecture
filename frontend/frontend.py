@@ -86,9 +86,9 @@ def page_disponibility_controller():
 @app.route("/page/disponibilite/<int:disponibilityId>", methods=["DELETE"])
 def page_disponibility_id_controller(disponibilityId):
     delete_disponibility_result = delete_disponibility(disponibilityId)
-    if(create_disponibility_result["success"]):
+    if(delete_disponibility_result["success"]):
         return redirect(url_for("page_controller"))
-    elif(create_disponibility_result["allowed"]):
+    elif(delete_disponibility_result["allowed"]):
         return redirect(url_for("page_controller"))
     else:
         return redirect(url_for("login_controller"))
