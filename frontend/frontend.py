@@ -11,7 +11,12 @@ app.secret_key = "38v55ZveT6Pout1r7KZR"
 
 @app.route("/")
 def home_controller():
-    return render_template("accueil.html", logged=(session.get('token') is not None))
+    get_recommended_pages_result = get_recommended_pages()
+    if(get_recommended_pages_result["success"]):
+        return render_template("accueil.html", logged=(session.get('token') is not None), recommended_pages=get_recommended_pages_result["pages"])
+    else:
+        return render_template("accueil.html", logged=(session.get('token') is not None))
+
 
 @app.route("/connexion", methods=["GET", "POST"])
 def login_controller():

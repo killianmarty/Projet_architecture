@@ -4,7 +4,13 @@ import jwt
 from datetime import datetime, timedelta
 from flask import jsonify, request
 
+
+
+
 SECRET_KEY = 'xFUIOWIarlY5hBQU9lLunttJ7nPlfqGF'
+
+
+
 
 def authenticate_token():
     token = request.headers.get('Authorization')
@@ -55,7 +61,7 @@ def login(username, password):
     # Check username and password
     user = executeQuery("SELECT * FROM User WHERE username = %s", (username,))
 
-    if user and bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):  # Conversion ajoutée ici
+    if user and bcrypt.checkpw(password.encode('utf-8'), user['password'].encode('utf-8')):
         # Generate JWT Token
         token = jwt.encode({
             'userId': user['id'],

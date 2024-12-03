@@ -69,6 +69,20 @@ def get_page_by_id(pageId):
             "success" : False
         }
 
+
+def get_recommended_pages():
+    response = requests.get(f"{API_URL}/recommended")
+    if response.status_code == 200:
+        return {
+            "success": True,
+            "pages": response.json()
+        }
+    else:
+        return {
+            "success": False
+        }
+
+
 def search_pages(query):
     result = []
     if(not (query == None or query =="")):

@@ -47,6 +47,21 @@ def get_user_page(userId):
     except mysql.connector.Error as e:
         return jsonify({'error': f'Database error: {str(e)}'}), 500
 
+
+def get_recommended_pages():
+    try:
+        results = executeQueryAll("SELECT * FROM Page ORDER BY id LIMIT 3", ())
+        searchResult = [{"id": result["id"], "page_name": result["page_name"], "description": result["description"], "activity": result["activity"]} for result in results]
+
+        return jsonify(searchResult), 200
+
+    except mysql.connector.IntegrityError:
+        return jsonify({'error': 'No pages'}), 404
+    
+    except mysql.connector.Error as e:
+        return jsonify({'error': f'Database error: {str(e)}'}), 500
+
+
 def create_page(userId, pageName, description, activity, visible):
 
     #Check if all inputs are defined

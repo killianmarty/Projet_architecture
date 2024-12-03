@@ -95,6 +95,9 @@ def page_id_disponibilities_id_controller(pageId, disponibilityId):
     return book_disponibility(pageId, disponibilityId, name, mail)
         
 
+@app.route('/recommended', methods=['GET'])
+def recommended_controller():
+    return get_recommended_pages()
 
 @app.route('/cancel', methods=["DELETE"])
 def cancel_controler():
