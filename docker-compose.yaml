@@ -18,6 +18,7 @@ services:
       - mysql
     networks:
       - app_network
+    restart: always
       
   api2:
     build:
@@ -35,6 +36,7 @@ services:
       - mysql
     networks:
       - app_network
+    restart: always
 
   # frontend instances
   frontend1:
@@ -48,6 +50,7 @@ services:
       - api1
     networks:
       - app_network
+    restart: always
       
   frontend2:
     build:
@@ -60,6 +63,7 @@ services:
       - api1
     networks:
       - app_network
+    restart: always
 
   # MySQL database
   mysql:
@@ -78,6 +82,7 @@ services:
       - '3306'
     networks:
       - app_network
+    restart: always
 
   # Load balancer for API
   nginx_api:
@@ -89,6 +94,7 @@ services:
       - api1
     networks:
       - app_network
+    restart: always
 
   # Load balancer for frontend
   nginx_frontend:
@@ -102,7 +108,25 @@ services:
       - frontend1
     networks:
       - app_network
+    restart: always
+
+  # Portainer (monitoring and container management)
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    command: -H unix:///var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    ports:
+      - "9000:9000"
+    restart: always
+    networks:
+      - app_network
 
 networks:
   app_network:
     driver: bridge
+
+volumes:
+  portainer_data:
