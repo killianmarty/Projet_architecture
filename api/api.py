@@ -92,7 +92,7 @@ def page_id_disponibilities_id_controller(pageId, disponibilityId):
     name = data.get('name')
     mail = data.get('mail')
 
-    return book_disponibility(pageId, disponibilityId, name, mail)
+    return book_disponibility(disponibilityId, name, mail)
         
 
 @app.route('/recommended', methods=['GET'])

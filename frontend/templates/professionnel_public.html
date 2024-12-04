@@ -67,13 +67,17 @@
             <div class="availability-section">
                 <h2>Disponibilités</h2>
                 <ul class="list-group" id="availability-list">
-                    <!-- Liste des disponibilités -->
-                    {% for disponibility in disponibilities.free %}
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        {{ disponibility.date }}
-                        <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#reservationModal" onclick="setDisponibilityData({{ disponibility.page_id }}, {{ disponibility.id }})">Réserver</a>
-                    </li>
-                    {% endfor %}
+                    {% if disponibilities.free|length == 0 %}
+                    <li class="list-group-item">Aucune disponibilité</li>
+                    {% else %}
+                        <!-- Liste des disponibilités -->
+                        {% for disponibility in disponibilities.free %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            {{ disponibility.date }}
+                            <a class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#reservationModal" onclick="setDisponibilityData({{ disponibility.page_id }}, {{ disponibility.id }})">Réserver</a>
+                        </li>
+                        {% endfor %}
+                    {% endif %}
                 </ul>
             </div>
         </div>
@@ -136,6 +140,11 @@
             selectedPageId = page_id;
             selectedDisponibilityId = disponibility_id;
         }
+
+        document.getElementById('resultModal').addEventListener('hidden.bs.modal', function () {
+            // Rafraîchir la page lorsque la modal est fermée
+            location.reload();
+        });
 
         // Fonction pour valider la réservation et afficher le modal de résultat
         document.getElementById("confirmReservationBtn").addEventListener("click", function() {

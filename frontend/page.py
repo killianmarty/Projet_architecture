@@ -36,7 +36,7 @@ def get_user_page():
         disponibilitesResponse = requests.get(f"{API_URL}/page/disponibilities", headers=header)
         disponibilities = {}
         if disponibilitesResponse.status_code == 200:
-            disponibilities["booked"] = [{"date": isoDateToHumanDate(dispo['date']), "id": dispo['id']} for dispo in (disponibilitesResponse.json())["booked"]]
+            disponibilities["booked"] = [{"date": isoDateToHumanDate(dispo['date']), "id": dispo['id'], "name": dispo["name"], "mail": dispo["mail"]} for dispo in (disponibilitesResponse.json())["booked"]]
             disponibilities["free"] = [{"date": isoDateToHumanDate(dispo['date']), "id": dispo['id']} for dispo in (disponibilitesResponse.json())["free"]]
         return {
             "success" : True,

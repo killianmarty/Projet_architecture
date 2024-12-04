@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS `Page` (
   `description` TEXT,
   `activity` TEXT,
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`user_id`) REFERENCES `User`(`id`)
+  FOREIGN KEY (`user_id`) REFERENCES `User`(`id`) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS `Disponibility` (
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS `Disponibility` (
   `date` DATETIME NULL,
   `page_id` INT NOT NULL,
   PRIMARY KEY (`id`),
-  FOREIGN KEY (`page_id`) REFERENCES `Page`(`id`)
+  FOREIGN KEY (`page_id`) REFERENCES `Page`(`id`) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS `Booking` (
@@ -37,5 +37,5 @@ CREATE TABLE IF NOT EXISTS `Booking` (
   `mail` VARCHAR(255) NOT NULL,
   `name` VARCHAR(255) NOT NULL,
   PRIMARY KEY (`disponibility_id`),
-  FOREIGN KEY (`disponibility_id`) REFERENCES `Disponibility`(`id`)
+  FOREIGN KEY (`disponibility_id`) REFERENCES `Disponibility`(`id`) ON DELETE CASCADE
 );

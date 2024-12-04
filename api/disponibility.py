@@ -123,7 +123,7 @@ def get_disponibilities(pageId):
         for row in res1:
             row["date"] = row["date"].strftime("%Y-%m-%d %H:%M:%S")
         
-        booked = executeQueryAll("SELECT date, id, page_id FROM Disponibility JOIN Booking ON Disponibility.id = Booking.disponibility_id WHERE page_id = %s", (pageId,))
+        booked = executeQueryAll("SELECT date, id, page_id, mail, name FROM Disponibility JOIN Booking ON Disponibility.id = Booking.disponibility_id WHERE page_id = %s", (pageId,))
         res2 = [dict(row) for row in booked]
         for row in res2:
             row["date"] = row["date"].strftime("%Y-%m-%d %H:%M:%S")
